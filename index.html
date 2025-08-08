@@ -1,14 +1,124 @@
-<html dir="rtl">
+<html>
     <head>
-        <meta name="viewport" content="width=device-width" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Anta&display=swap" rel="stylesheet">
+        <style>
+            .anta-regular {
+                font-family: "Anta", sans-serif;
+                font-weight: 400;
+                font-style: normal;
+            }
+            .cartis {
+                width: 200px;
+                height: 100px;
+                font-size: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                
+            }
+            .hafuh {
+                background-color: #20daff;
+                text-indent: -9999px;
+                box-shadow: #0e788dad 16px 15px 5px 0px;
+            }
+            .galuy {
+                background-color: #d5f8ff;
+                box-shadow: #86c0cc 16px 15px 5px 0px;
+            }
+            .luah {
+                display: grid;
+                grid-template-columns: 200px 200px 200px 200px;
+                grid-template-rows: 100px 100px 100px;
+                gap:40px;
+                justify-items: center;
+                align-items: center;
+            }
+        </style>
         <script>
-            alert('שלומות!');
-            alert('תלחצו עוד פעם על "אוקי"');
-            alert('עוד פעם אחת ודי');
+            nekudot=0
+            misparPtuhim=0
+            zugotNehonim=0
+            rishon=null
+            function lahaphoh(who) {
+                if (misparPtuhim==2){
+                    return
+                }
+                who.classList.remove("hafuh")
+                who.classList.add("galuy")
+                misparPtuhim=misparPtuhim+1
+                if(misparPtuhim==1) {
+                    rishon=who
+                }
+                if (misparPtuhim==2) {
+                    if (who.textContent==rishon.textContent){
+                        misparPtuhim=0
+                        nekudot=nekudot+5
+                        zugotNehonim=zugotNehonim+1
+                        document.getElementById("points").textContent=nekudot
+                        if (zugotNehonim==6){
+                            document.getElementById("hodaa").textContent="well done!"
+                        }
+                        return
+                    }
+                    setTimeout(function(){
+                        who.classList.remove("galuy")
+                        who.classList.add("hafuh")
+                        rishon.classList.remove("galuy")
+                        rishon.classList.add("hafuh")
+                        misparPtuhim=0
+                    },
+                    2000)
+                    nekudot=nekudot-1
+                    document.getElementById("points").textContent=nekudot
+                }
+            }
         </script>
     </head>
     <body>
-        זהו, נגמר
-        <button onclick="alert('למה לחצתם? 😡')">תלחצו עלי</button>
+        <div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
+        <div style="padding: 70px; font-size: 30px;" class="anta-regular">Points: <span id="points">0</span></div>
+        <div id="hodaa" class="anta-regular" style="font-size: 60px;"></div>
+        <div class="luah">
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐶
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐱
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐟
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐰
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐰
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐭
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐶
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐭
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐟
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐢
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐱
+            </div>
+            <div class="cartis hafuh" onclick="lahaphoh(this)">
+                🐢
+            </div>
+        </div>
+        </div>
+
     </body>
 </html>
