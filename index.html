@@ -41,6 +41,7 @@
             misparPtuhim=0
             zugotNehonim=0
             rishon=null
+            peamimNitspa=[0,0,0,0,0,0,0,0,0,0,0,0]
             function lahaphoh(who) {
                 if (misparPtuhim==2){
                     return
@@ -48,6 +49,7 @@
                 who.classList.remove("hafuh")
                 who.classList.add("galuy")
                 misparPtuhim=misparPtuhim+1
+                peamimNitspa[parseInt(who.id)] = peamimNitspa[parseInt(who.id)]+1
                 if(misparPtuhim==1) {
                     rishon=who
                 }
@@ -70,7 +72,12 @@
                         misparPtuhim=0
                     },
                     2000)
-                    nekudot=nekudot-1
+                    if (peamimNitspa[parseInt(who.id)]>=2){
+                        nekudot=nekudot-1
+                    }
+                    if (peamimNitspa[parseInt(rishon.id)]>=2){
+                        nekudot=nekudot-1
+                    }
                     document.getElementById("points").textContent=nekudot
                 }
             }
@@ -81,40 +88,40 @@
         <div style="padding: 70px; font-size: 30px;" class="anta-regular">Points: <span id="points">0</span></div>
         <div id="hodaa" class="anta-regular" style="font-size: 60px;"></div>
         <div class="luah">
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="0" onclick="lahaphoh(this)">
                 🐶
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="1" onclick="lahaphoh(this)">
                 🐱
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="2" onclick="lahaphoh(this)">
                 🐟
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="3" onclick="lahaphoh(this)">
                 🐰
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="4" onclick="lahaphoh(this)">
                 🐰
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="5" onclick="lahaphoh(this)">
                 🐭
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="6" onclick="lahaphoh(this)">
                 🐶
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="7" onclick="lahaphoh(this)">
                 🐭
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="8" onclick="lahaphoh(this)">
                 🐟
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="9" onclick="lahaphoh(this)">
                 🐢
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="10" onclick="lahaphoh(this)">
                 🐱
             </div>
-            <div class="cartis hafuh" onclick="lahaphoh(this)">
+            <div class="cartis hafuh" id="11" onclick="lahaphoh(this)">
                 🐢
             </div>
         </div>
