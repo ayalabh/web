@@ -61,6 +61,9 @@
                         document.getElementById("points").textContent=nekudot
                         if (zugotNehonim==6){
                             document.getElementById("hodaa").textContent="well done!"
+                            if (nekudot==30){
+                                document.getElementById("maxnekudot").textContent="you got max points!🎉"
+                            }
                         }
                         return
                     }
@@ -87,6 +90,7 @@
         <div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
         <div style="padding: 70px; font-size: 30px;" class="anta-regular">Points: <span id="points">0</span></div>
         <div id="hodaa" class="anta-regular" style="font-size: 60px;"></div>
+        <div id="maxnekudot" class="anta-regular" style="font-size: 40px;"></div>
         <div class="luah">
             <div class="cartis hafuh" id="0" onclick="lahaphoh(this)">
                 🐶
