@@ -42,6 +42,17 @@
             zugotNehonim=0
             rishon=null
             peamimNitspa=[0,0,0,0,0,0,0,0,0,0,0,0]
+            function learbev() {
+                emojis=["🐶", "🐶","😺","😺", "🐟", "🐟", "🐰", "🐰", "🐭", "🐭", "🐢", "🐢"]
+                id=0
+                while(emojis.length>0){
+                    eizeEmoji=Math.floor(Math.random()*emojis.length)
+                    document.getElementById(id).textContent=emojis[eizeEmoji]
+                    emojis.splice(eizeEmoji, 1)
+                    id=id+1
+                }
+
+            }
             function lahaphoh(who) {
                 if (misparPtuhim==2){
                     return
@@ -86,7 +97,7 @@
             }
         </script>
     </head>
-    <body>
+    <body onload="learbev()">
         <div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
         <div style="padding: 70px; font-size: 30px;" class="anta-regular">Points: <span id="points">0</span></div>
         <div id="hodaa" class="anta-regular" style="font-size: 60px;"></div>
