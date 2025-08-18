@@ -82,16 +82,28 @@
                 padding: 15px 30px;
                 font-size: 30px;
             }
+            .jumpButton:active{
+                box-shadow: 0 0;
+                margin-top: 7px;
+            }
             .outsideJumpbutton{
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
+                cursor: pointer;
             }
         </style>
+        <script>
+            function jump() {
+                frog = document.getElementById("frog")
+                upDownSlider = document.getElementById("upDownSlider")
+                frog.style.top = "50%"
+            }
+        </script>
     </head>
     <body>
         <div class="game">
-            <img src="frog.png" class="frog">
+            <img src="frog.png" class="frog" id="frog">
             <img src="lotus.png" class="lotus">
         </div>
         <div class="bottom">
@@ -101,18 +113,18 @@
                 </div>
                 <div class="inputAndArrow">
                     ⬅️
-                    <input type="range" min="-50" max="50" class="slider">
+                    <input type="range" min="-50" max="50" class="slider" id="leftRightSlider">
                     ➡️
                 </div>
                 <div class="inputAndArrow">
                     ⬇️
-                    <input type="range" min="-50" max="50" class="slider">
+                    <input type="range" min="-50" max="50" class="slider" id="upDownSlider">
                     ⬆️
                 </div>
             </div>
             <div class="outsideJumpbutton">
-                <div class="jumpButton dynapuff">
-                    jump
+                <div class="jumpButton dynapuff" onclick="jump()">
+                    Jump
                 </div>
             </div>
         </div>
