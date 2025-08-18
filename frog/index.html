@@ -10,13 +10,11 @@
                 background-color: #c3e7ff;
             }
             .buttons{
-                width:100%;
-                height: 30%;
-                background-color: #146093;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
+                width: 80%;
             }
             .lotus{
                 position: absolute;
@@ -42,6 +40,9 @@
             }
             .inputAndArrow{
                 width: 45%;
+                font-size: 30px;
+                display: flex;
+                align-items: center;
             }
             .guide{
                 font-size: 30px;
@@ -67,6 +68,25 @@
                 appearance: none;
                 background: transparent; /* keep track visible separately */
             }
+            .bottom{
+                display: flex;
+                flex-direction: row;
+                background-color: #146093;
+                 width:100%;
+                height: 30%;
+            }
+            .jumpButton{
+                color: #c3e7ff;
+                background-color: #0e3a58;
+                box-shadow: 7px 6px 5px 0px #000;
+                padding: 15px 30px;
+                font-size: 30px;
+            }
+            .outsideJumpbutton{
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
         </style>
     </head>
     <body>
@@ -74,19 +94,26 @@
             <img src="frog.png" class="frog">
             <img src="lotus.png" class="lotus">
         </div>
-        <div class="buttons">
-            <div class="guide dynapuff">
-                Move the frog to the leaf!
+        <div class="bottom">
+            <div class="buttons">
+                <div class="guide dynapuff">
+                    Move the frog to the leaf!
+                </div>
+                <div class="inputAndArrow">
+                    ⬅️
+                    <input type="range" min="-50" max="50" class="slider">
+                    ➡️
+                </div>
+                <div class="inputAndArrow">
+                    ⬇️
+                    <input type="range" min="-50" max="50" class="slider">
+                    ⬆️
+                </div>
             </div>
-            <div class="inputAndArrow">
-                ⬅️
-                <input type="range" min="-50" max="50" class="slider">
-                ➡️
-            </div>
-            <div class="inputAndArrow">
-                ⬇️
-                <input type="range" min="-50" max="50" class="slider">
-                ⬆️
+            <div class="outsideJumpbutton">
+                <div class="jumpButton dynapuff">
+                    jump
+                </div>
             </div>
         </div>
     </body>
