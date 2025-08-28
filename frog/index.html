@@ -111,10 +111,12 @@
                 newTop = -upDownSlider+5
                 frog.style.top = newTop + "%"
                 frog.style.left = newLeft + "%"
-                if (newLeft < 36 && newLeft > 19 && newTop < 33 && newTop > 23) {
-                    points=points+1
-                    document.getElementById("points").innerText=points
-                }
+                setTimeout(function(){
+                    if (newLeft < 37 && newLeft > 18 && newTop < 34 && newTop > 22) {
+                        points=points+1
+                        document.getElementById("points").innerText=points
+                    }
+                }, 1000)
             }
         </script>
     </head>
