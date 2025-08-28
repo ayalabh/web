@@ -95,14 +95,26 @@
                 justify-content: center;
                 cursor: pointer;
             }
+            .points{
+                padding: 20px;
+                font-size: 35px;
+                color: #146093;
+            }
         </style>
         <script>
+            points=0
             function jump() {
                 frog = document.getElementById("frog")
                 upDownSlider = parseInt(document.getElementById("upDownSlider").value)
                 leftRightSlider = parseInt (document.getElementById("leftRightSlider").value)
-                frog.style.top = (-upDownSlider+5) + "%"
-                frog.style.left = (leftRightSlider+75) + "%"
+                newLeft = leftRightSlider+75
+                newTop = -upDownSlider+5
+                frog.style.top = newTop + "%"
+                frog.style.left = newLeft + "%"
+                if (newLeft < 36 && newLeft > 19 && newTop < 33 && newTop > 23) {
+                    points=points+1
+                    document.getElementById("points").innerText=points
+                }
             }
         </script>
     </head>
@@ -110,6 +122,7 @@
         <div class="game">
             <img src="frog.png" class="frog" id="frog">
             <img src="lotus.png" class="lotus">
+            <div class="points dynapuff"> 🪷<span id="points">0</span> </div>
         </div>
         <div class="bottom">
             <div class="buttons">
