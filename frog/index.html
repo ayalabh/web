@@ -104,6 +104,7 @@
         <script>
             points=0
             function jump() {
+                document.getElementById("jumpButton").onclick=""
                 frog = document.getElementById("frog")
                 upDownSlider = parseInt(document.getElementById("upDownSlider").value)
                 leftRightSlider = parseInt (document.getElementById("leftRightSlider").value)
@@ -116,6 +117,11 @@
                         points=points+1
                         document.getElementById("points").innerText=points
                     }
+                    newLeft=Math.random()*90
+                    newTop=Math.random()*90
+                    frog.style.top = newTop + "%"
+                    frog.style.left = newLeft + "%"
+                    document.getElementById("jumpButton").onclick=jump
                 }, 1000)
             }
         </script>
@@ -143,7 +149,7 @@
                 </div>
             </div>
             <div class="outsideJumpbutton">
-                <div class="jumpButton dynapuff" onclick="jump()">
+                <div class="jumpButton dynapuff" onclick="jump()" id="jumpButton">
                     Jump
                 </div>
             </div>
