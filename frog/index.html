@@ -20,11 +20,14 @@
                 position: absolute;
                 left: 20%;
                 top: 30%;
+                z-index: 2;
             }
             .frog{
                 position: absolute;
                 left: 75%;
                 top: 5%;
+                z-index: 3;
+                transition: left 1s ease-in-out, top 1s ease-in-out
             }
             .dynapuff {
                 font-family: "DynaPuff", system-ui;
@@ -96,8 +99,10 @@
         <script>
             function jump() {
                 frog = document.getElementById("frog")
-                upDownSlider = document.getElementById("upDownSlider")
-                frog.style.top = "50%"
+                upDownSlider = parseInt(document.getElementById("upDownSlider").value)
+                leftRightSlider = parseInt (document.getElementById("leftRightSlider").value)
+                frog.style.top = (-upDownSlider+5) + "%"
+                frog.style.left = (leftRightSlider+75) + "%"
             }
         </script>
     </head>
