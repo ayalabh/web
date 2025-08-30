@@ -1,0 +1,81 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                background-color: #d8fffc;
+            }
+            a {
+                color: black;
+                text-decoration: none;
+            }
+            .main {
+                display:flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+            .chewy {
+                font-family: "Chewy", system-ui;
+                font-weight: 400;
+                font-style: normal;
+            }
+            .title {
+                background-color: #1ac4e8;
+                font-size: 40px;
+                padding: 10px;
+                margin: 15px;
+                text-align: center;
+            }
+            .game {
+                display:flex;
+                flex-direction: row;
+                align-items: center;
+                margin: 0 40px;
+                gap: 30px;
+            }
+            .gameIcon img {
+                height: 60px;
+            }
+            .gameIcon {
+                font-size: 60px;
+            }
+            .gameText {
+                font-size: 25px;
+            }
+        </style>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div class="main chewy">
+            <div class="title">
+                Ayalit Games Ltd.
+            </div>
+            <div class="game">
+                <div class="gameIcon">
+                    <a href="frog/" target="_blank">
+                        <img src="frog/frog.png">
+                    </a>
+                </div>
+                <div class="gameText">
+                    <a href="frog/" target="_blank">
+                        Frog & Lotus
+                    </a>
+                </div>
+            </div>
+            <div class="game">
+                <div class="gameIcon">
+                    <a href="memory/" target="_blank">
+                        🐶
+                    </a>
+                </div>
+                <div class="gameText">
+                    <a href="memory/" target="_blank">
+                        Memory Game
+                    </a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
