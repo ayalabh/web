@@ -27,7 +27,6 @@
                 left: 75%;
                 top: 5%;
                 z-index: 3;
-                transition: left 1s ease-in-out, top 1s ease-in-out
             }
             .dynapuff {
                 font-family: "DynaPuff", system-ui;
@@ -100,37 +99,64 @@
                 font-size: 35px;
                 color: #146093;
             }
+            .wellDone{
+                position: absolute;
+                left: 15%;
+                top: 28%;
+                color: #146093;
+                display: none;
+            }
         </style>
         <script>
             points=0
+            newTop=Math.random()*50
+            newLeft=Math.random()*90
+            function start() {
+                frog = document.getElementById("frog")
+                frog.style.top=newTop + "%"
+                frog.style.left=newLeft + "%"
+                setTimeout(() => {
+                    frog.style.transition="left 1s ease-in-out, top 1s ease-in-out"
+                }, 50);
+            }
             function jump() {
                 document.getElementById("jumpButton").onclick=""
                 frog = document.getElementById("frog")
                 upDownSlider = parseInt(document.getElementById("upDownSlider").value)
                 leftRightSlider = parseInt (document.getElementById("leftRightSlider").value)
-                newLeft = leftRightSlider+75
-                newTop = -upDownSlider+5
+                newLeft = leftRightSlider+newLeft
+                newTop = -upDownSlider+newTop
                 frog.style.top = newTop + "%"
                 frog.style.left = newLeft + "%"
                 setTimeout(function(){
                     if (newLeft < 37 && newLeft > 18 && newTop < 34 && newTop > 22) {
-                        points=points+1
+                        points=points+2
                         document.getElementById("points").innerText=points
+                        document.getElementById("wellDone").style.display="block"
+                        setTimeout(() => {
+                            document.getElementById("wellDone").style.display="none"
+                            newLeft=Math.random()*90
+                            newTop=Math.random()*50
+                            frog.style.top = newTop + "%"
+                            frog.style.left = newLeft + "%"
+                            document.getElementById("jumpButton").onclick=jump
+                        }, 3000);
                     }
-                    newLeft=Math.random()*90
-                    newTop=Math.random()*90
-                    frog.style.top = newTop + "%"
-                    frog.style.left = newLeft + "%"
-                    document.getElementById("jumpButton").onclick=jump
+                    else {
+                        points=points-1
+                        document.getElementById("points").innerText=points
+                        document.getElementById("jumpButton").onclick=jump
+                    }
                 }, 1000)
             }
         </script>
     </head>
-    <body>
+    <body onload="start()">
         <div class="game">
             <img src="frog.png" class="frog" id="frog">
             <img src="lotus.png" class="lotus">
             <div class="points dynapuff"> 🪷<span id="points">0</span> </div>
+            <div class="wellDone dynapuff" id="wellDone">well done! you hit the leaf!</div>
         </div>
         <div class="bottom">
             <div class="buttons">
