@@ -15,7 +15,7 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                width: 80%;
+                width: 60%;
             }
             .lotus{
                 position: absolute;
@@ -52,6 +52,7 @@
                 .bottom {
                     flex-direction: column;
                     align-items: center;
+                    gap: 20px;
                 }
                 .frog{
                     width: 20%;
@@ -59,19 +60,22 @@
                 .lotus{
                     width: 30%;
                 }
-                .guide, .jumpButton{
+                .guide, .button{
                     font-size: 15px;
                 }
-                .jumpButton{
+                .button{
                     padding: 10px 25px;
                 }
             }
             @media all and (min-width: 768px) {
-                .guide, .jumpButton{
+                .guide, .button{
                     font-size: 30px;
                 }
-                .jumpButton{
+                .button{
                     padding: 15px 30px;
+                }
+                .bottom{
+                    gap: 35px;
                 }
             }
             .guide{
@@ -103,17 +107,17 @@
                  width:100%;
                 height: 30%;
             }
-            .jumpButton{
+            .button{
                 color: #c3e7ff;
                 background-color: #0e3a58;
                 box-shadow: 7px 6px 5px 0px #000;
                 cursor: pointer;
             }
-            .jumpButton:active{
+            .button:active{
                 box-shadow: 0 0;
                 margin-top: 7px;
             }
-            .outsideJumpbutton{
+            .outsidebutton{
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
@@ -198,9 +202,14 @@
                     ⬆️
                 </div>
             </div>
-            <div class="outsideJumpbutton">
-                <div class="jumpButton dynapuff" onclick="jump()" id="jumpButton">
+            <div class="outsidebutton">
+                <div class="button dynapuff" onclick="jump()" id="jumpButton">
                     Jump
+                </div>
+            </div>
+            <div class="outsidebutton">
+                <div class="button dynapuff" onclick="" id="tutorialButton">
+                    Tutorial
                 </div>
             </div>
         </div>
