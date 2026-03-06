@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="he" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מתרגם אילית-עברית</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300;400;600&family=Outfit:wght@300;400;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      padding: 2rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #e0d7ff;
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #9b8ec4;
+      font-size: 1rem;
+      font-weight: 300;
+      margin-bottom: 2.5rem;
+    }
+
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-lang {
+      font-size: 1.1rem;
+      color: #e0d7ff;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-align: right;
+    }
+
+    textarea {
+      flex: 1;
+      min-height: 200px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 1rem;
+      color: #f0ecff;
+      font-family: 'Noto Sans Hebrew', 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    textarea:focus {
+      border-color: rgba(167, 139, 250, 0.5);
+    }
+
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    #input-text {
+      direction: rtl;
+      text-align: right;
+    }
+
+    #output-text {
+      direction: rtl;
+      text-align: right;
+    }
+
+    @media (max-width: 640px) {
+      .panels { grid-template-columns: 1fr; }
+      h1 { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>מתרגם אילית-עברית</h1>
+
+    <div class="panels">
+      <div class="panel">
+        <span class="panel-lang">עברית</span>
+        <textarea id="input-text" placeholder="הקלידו טקסט בעברית כאן..."></textarea>
+      </div>
+      <div class="panel">
+        <span class="panel-lang">אילית</span>
+        <textarea id="output-text" placeholder="הקלידו טקסט באילית כאן..."></textarea>
+      </div>
+    </div>
+  </div>
+
+<script>
+const dict = {};
+function add(heb, aya) {
+  heb.split('\\').forEach(h => { dict[h.trim()] = aya.trim(); });
+}
+
+// שמות גוף
+add('אני', 'נו');
+add('את/ה', 'טמו'); // generic
+add('את', 'טמא');
+add('אתה', 'טמון');
+add('היא', 'דיק');
+add('הוא', 'מיק');
+add('אנחנו', 'דק');
+add('אתם\\אתן', 'טמופ');
+add('הם\\הן', 'איקט');
+
+// ברכות ומילות נימוס
+add('שלום', 'טיקם');
+add('להתראות', 'עים-גנטיק');
+add('תודה', 'אישמלד');
+add('בבקשה', 'פטשדק');
+
+// מילים קטנות
+add('אם', 'נוק');
+add('עם', 'תנאי');
+add('בלי', 'אומי');
+add('אבל', 'נוי');
+add('אז', 'דם');
+add('גם', 'קרדם');
+add('על', 'מים');
+add('מעל', 'שקיג');
+add('כמו', 'שד');
+
+// תשובות
+add('כן', 'טק');
+add('לא', 'מן');
+add('אולי', 'טשטנק');
+add('ברור', 'בושרדק');
+
+// שייכות
+add('של', 'מט');
+add('שלי', 'נומט');
+add('שלך', 'טמט');
+add('שלה', 'מטיק');
+add('שלו', 'מטום');
+add('שלנו', 'דקמט');
+add('שלכם\\שלכן', 'מטופ');
+add('שלהם\\שלהן', 'מיקט');
+
+// תארים
+add('נחמד', 'מובק');
+
+// ביטויי זמן
+add('היה', 'טיפ');
+add('יהיה', 'טיט');
+add('היום', 'אמגשא');
+
+// פעלים
+add('ללכת', 'שלל');
+add('לשתות', 'גרומל');
+add('לאכול', 'קשו');
+add('לשבת', 'דנא');
+add('לשכב', 'שטנמא');
+add('לישון', 'דקטפ');
+add('להזמין', 'מרקריג');
+add('לתת', 'איקר');
+add('לדבר', 'דשט');
+add('לומר', 'דשט');
+add('להפסיק', 'דמופ');
+add('לעשות', 'גם');
+add('להכין', 'שיליק');
+add('לעלות', 'מופט');
+add('לרדת', 'גמיג');
+add('לנסוע', 'ריק');
+add('לשחק', 'פשט');
+add('לראות', 'גמל');
+add('להאיר', 'רואי');
+add('לנסות', 'ארט');
+add('למצוא', 'קום');
+add('לאבד', 'רומד');
+add('ללמוד', 'שרם');
+
+// מספרים
+add('אחד', 'מק');
+add('שתיים', 'אים');
+add('שלוש', 'אירק');
+add('ארבע', 'קמור');
+add('חמש', 'קון');
+add('שש', 'דוס');
+add('שבע', 'דקוקם');
+add('שמונה', 'קואי');
+add('תשע', 'מומק');
+add('עשר', 'אקם');
+add('אפס', 'זורם');
+
+// רגשות
+add('שמחה', 'שיפט');
+add('עצב', 'דשוג');
+add('פחד', 'קשר');
+add('הפתעה', 'דמפרודק');
+add('כעס', 'שמוקר');
+
+// ימים וזמנים
+add('עכשיו', 'מטוק');
+add('מחר', 'אמטרם');
+add('אתמול', 'טקדוק');
+add('זמן', 'אוטק');
+add('יום', 'גשט');
+add('לילה', 'מואי');
+add('בוקר', 'טרמן');
+add('צהריים', 'גנמקר');
+add('ערב', 'קוקמן');
+
+// נוזלים
+add('מים', 'שאקר');
+add('חלב', 'טלק');
+add('מיץ', 'טובליק');
+add('יין', 'מק');
+
+// פירות
+add('תפוז', 'רשמיק');
+add('תפוח', 'שפק');
+add('לימון', 'שדמקו');
+
+// מילות יחס
+add('לי', 'אומט');
+add('לך', 'איטמט');
+add('לה', 'אטיק');
+add('לו', 'טומיל');
+add('לנו', 'קמיט');
+add('לכם\\לכן', 'טוליפ');
+add('להם\\להן', 'איקט');
+add('ליד', 'מקשר');
+
+// יש / אין
+add('יש', 'מיטו');
+add('אין', 'השאמי');
+
+// בני אדם
+add('איש', 'קשי');
+add('אישה', 'שמטיק');
+add('ילד\\ילדה', 'לג');
+add('ילד', 'נמט');
+add('ילדה', 'עריד');
+add('בנאדם\\בתאדם', 'פרקדם');
+add('חבר\\חברה', 'קרומג');
+
+// משפחה
+add('אמא', 'ממי');
+add('אבא', 'ניני');
+add('אח', 'איקרנם');
+add('אחות', 'דודאקר');
+add('בן', 'דים');
+add('בת', 'איקרגשו');
+
+// חיות
+add('דוב', 'נקשר');
+add('חתול', 'ביש');
+add('כלב', 'גם');
+add('ארנב', 'נומיט');
+add('תוכי', 'פשר');
+add('דג', 'קודי');
+
+// מקומות טבעיים
+add('ים', 'דקש');
+add('חוף', 'נקשבי');
+add("ג'ונגל", 'טימיק');
+add('שדה', 'קרגי');
+add('הר', 'מאשום');
+add('נחל\\נהר', 'רקר');
+
+// בניינים
+add('מלון', 'אקים');
+add('קניון', 'טשק');
+
+// אלמנטים
+add('אש', 'נירק');
+add('אדמה', 'מגואר');
+add('אוויר', 'שור');
+
+// כיוונים
+add('ימינה', 'רואי');
+add('שמאלה', 'גר');
+add('למעלה', 'מופ');
+add('למטה', 'גם');
+
+// בשמיים
+add('שמיים', 'דלטי');
+add('שמש', 'דום');
+add('ירח', 'טמן');
+add('ענן', 'ברומניג');
+add('כוכב', 'דאשר');
+
+// מרקמים
+add('שיש', 'רנשינק');
+
+// כלי רכב
+add('מכונית', 'בשר');
+add('אוטובוס', 'נוד');
+add('מונית', 'אשטן');
+add('רכבת', 'ארשי');
+add('מטוס', 'פרישמק');
+add('כרכרה', 'בשראק');
+
+// השוואה
+add('דבר', 'דשק');
+
+// מקומות במדינה
+add('מדינה', 'שמגי');
+add('עיר', 'בואט');
+
+// שיער החיות
+add('נוצה', 'קשאיקר');
+add('פרווה', 'קור');
+add('קשקשים', 'גשמרוק');
+
+// מוזיקה
+add('מנגינה', 'טגרמגיט');
+
+// ========== verb conjugation system ==========
+// Each conjugated form maps to: { aya: ayalit verb root, t: tense, pl: plural?, pr: pronoun|null }
+const verbInfo = {};
+const pronounSet = new Set(['נו','טמו','טמא','טמון','דיק','מיק','דק','טמופ','איקט']);
+
+// Ayalit words that CANNOT be subjects — adverbs, conjunctions, prepositions, etc.
+const nonSubjectAya = new Set([
+  'מטוק','אמטרם','טקדוק','אמגשא','אוטק',
+  'שמג','אישו','נוי','דם','קרדם','נוק','שד',
+  'שאנם','קרים','אם','מים','שקיג','תנאי','אומי','מקשר',
+  'טק','מן','טשטנק','בושרדק',
+  'מט','נומט','טמט','מטאן','מטו','מטיק','מטום','דקמט','מטופ','מיקט',
+  'אומט','איטמט','אטיק','טומיל','קמיט','טוליפ',
+  'מיטו','השאמי','טיפ','טיט','טופ','טוט',
+  'טיקם','עים-גנטיק','אישמלד','פטשדק',
+  'איק','דשק','מובק',
+  'שיפט','דשוג','קשר','דמפרודק','שמוקר',
+]);
+
+// regV(ayalit_root,
+//   [past: 1s, 2s, 3ms, 3fs, 1p, 2pm, 2pf, 3p],
+//   [present: ms, fs, mp, fp],
+//   [future: 1s, 2ms, 2fs, 3ms, 1p, 2p, 3p],
+//   [imperatives])
+function regV(aya, past, pres, fut, imp) {
+  const pastPr = ['נו','טמו','מיק','דיק','דק','טמופ','טמופ','איקט'];
+  const pastPl = [false,false,false,false,true,true,true,true];
+  past.forEach((f,i) => { if (f && !verbInfo[f]) verbInfo[f]={aya,t:'p',pl:pastPl[i],pr:pastPr[i]}; });
+  const presPl = [false,false,true,true];
+  pres.forEach((f,i) => { if (f && !verbInfo[f]) verbInfo[f]={aya,t:'r',pl:presPl[i],pr:null}; });
+  const futPr = ['נו','טמו','טמא','מיק','דק','טמופ','איקט'];
+  const futPl = [false,false,false,false,true,true,true];
+  fut.forEach((f,i) => { if (f && !verbInfo[f]) verbInfo[f]={aya,t:'f',pl:futPl[i],pr:futPr[i]}; });
+  if (imp) imp.forEach(f => { if (f && !dict[f]) dict[f]=aya; });
+}
+
+regV('שלל',
+  ['הלכתי','הלכת','הלך','הלכה','הלכנו','הלכתם','הלכתן','הלכו'],
+  ['הולך','הולכת','הולכים','הולכות'],
+  ['אלך','תלך','תלכי','ילך','נלך','תלכו','ילכו'],
+  ['לכי','לכו']);
+regV('גרומל',
+  ['שתיתי','שתית','שתה','שתתה','שתינו','שתיתם','שתיתן','שתו'],
+  ['שותה',null,'שותים','שותות'],
+  ['אשתה','תשתה','תשתי','ישתה','נשתה','תשתו','ישתו'],
+  []);
+regV('קשו',
+  ['אכלתי','אכלת','אכל','אכלה','אכלנו','אכלתם','אכלתן','אכלו'],
+  ['אוכל','אוכלת','אוכלים','אוכלות'],
+  [null,'תאכל','תאכלי','יאכל','נאכל','תאכלו','יאכלו'],
+  ['אכול','אכלי']);
+regV('דנא',
+  ['ישבתי','ישבת','ישב','ישבה','ישבנו','ישבתם','ישבתן','ישבו'],
+  ['יושב','יושבת','יושבים','יושבות'],
+  ['אשב','תשב','תשבי',null,'נשב','תשבו',null],
+  ['שב','שבי','שבו']);
+regV('שטנמא',
+  ['שכבתי','שכבת','שכב','שכבה','שכבנו','שכבתם','שכבתן','שכבו'],
+  ['שוכב','שוכבת','שוכבים','שוכבות'],
+  ['אשכב','תשכב','תשכבי','ישכב','נשכב','תשכבו','ישכבו'],
+  ['שכבי']);
+regV('דקטפ',
+  ['ישנתי','ישנת','ישן','ישנה',null,'ישנתם','ישנתן',null],
+  [null,null,'ישנים','ישנות'],
+  ['אישן','תישן','תישני','יישן','נישן','תישנו','יישנו'],
+  []);
+regV('מרקריג',
+  ['הזמנתי','הזמנת','הזמין','הזמינה','הזמנו','הזמנתם','הזמנתן','הזמינו'],
+  ['מזמין','מזמינה','מזמינים','מזמינות'],
+  ['אזמין','תזמין','תזמיני','יזמין','נזמין','תזמינו','יזמינו'],
+  ['הזמן','הזמיני']);
+regV('איקר',
+  ['נתתי','נתת','נתן','נתנה',null,'נתתם','נתתן','נתנו'],
+  ['נותן','נותנת','נותנים','נותנות'],
+  ['אתן','תיתן','תתני','ייתן','ניתן','תתנו','ייתנו'],
+  ['תן','תני','תנו']);
+regV('דשט',
+  ['דיברתי','דיברת','דיבר','דיברה','דיברנו','דיברתם','דיברתן','דיברו'],
+  ['מדבר','מדברת','מדברים','מדברות'],
+  ['אדבר','תדבר','תדברי','ידבר','נדבר','תדברו','ידברו'],
+  ['דבר','דברי']);
+// לומר → דשט (same Ayalit word)
+regV('דשט',
+  ['אמרתי','אמרת','אמר','אמרה','אמרנו','אמרתם','אמרתן','אמרו'],
+  ['אומר','אומרת','אומרים','אומרות'],
+  [null,'תאמר','תאמרי','יאמר','נאמר','תאמרו','יאמרו'],
+  []);
+regV('דמופ',
+  ['הפסקתי','הפסקת','הפסיק','הפסיקה','הפסקנו','הפסקתם','הפסקתן','הפסיקו'],
+  ['מפסיק','מפסיקה','מפסיקים','מפסיקות'],
+  ['אפסיק','תפסיק','תפסיקי','יפסיק','נפסיק','תפסיקו','יפסיקו'],
+  ['הפסק','הפסיקי']);
+regV('גם',
+  ['עשיתי','עשית','עשה','עשתה','עשינו','עשיתם','עשיתן','עשו'],
+  ['עושה',null,'עושים','עושות'],
+  ['אעשה','תעשה','תעשי','יעשה','נעשה','תעשו','יעשו'],
+  ['עשי']);
+regV('שיליק',
+  ['הכנתי','הכנת','הכין','הכינה','הכנו','הכנתם','הכנתן','הכינו'],
+  ['מכין','מכינה','מכינים','מכינות'],
+  ['אכין','תכין','תכיני','יכין','נכין','תכינו','יכינו'],
+  ['הכן','הכיני']);
+regV('מופט',
+  ['עליתי','עלית','עלה','עלתה','עלינו','עליתם','עליתן','עלו'],
+  ['עולה',null,'עולים','עולות'],
+  ['אעלה','תעלה','תעלי','יעלה','נעלה','תעלו','יעלו'],
+  ['עלי']);
+regV('גמיג',
+  ['ירדתי','ירדת','ירד','ירדה','ירדנו','ירדתם','ירדתן','ירדו'],
+  ['יורד','יורדת','יורדים','יורדות'],
+  ['ארד','תרד','תרדי',null,'נרד','תרדו',null],
+  ['רד','רדי','רדו']);
+regV('ריק',
+  ['נסעתי','נסעת','נסע','נסעה','נסענו','נסעתם','נסעתן','נסעו'],
+  ['נוסע','נוסעת','נוסעים','נוסעות'],
+  ['אסע','תיסע','תיסעי','ייסע','ניסע','תיסעו','ייסעו'],
+  ['סע','סעי','סעו']);
+// alternative future forms without yod
+['תסע','תסעי','יסע','תסעו','יסעו'].forEach(f => {
+  if (!verbInfo[f]) verbInfo[f] = verbInfo['תיסע'] || {aya:'ריק',t:'f',pl:false,pr:'טמון'};
+});
+regV('פשט',
+  ['שיחקתי','שיחקת','שיחק','שיחקה','שיחקנו','שיחקתם','שיחקתן','שיחקו'],
+  ['משחק','משחקת','משחקים','משחקות'],
+  ['אשחק','תשחק','תשחקי','ישחק','נשחק','תשחקו','ישחקו'],
+  ['שחק','שחקי','שחקו']);
+regV('גמל',
+  ['ראיתי','ראית','ראה','ראתה','ראינו','ראיתם','ראיתן','ראו'],
+  ['רואה',null,'רואים','רואות'],
+  ['אראה','תראה','תראי','יראה','נראה','תראו','יראו'],
+  ['ראי']);
+regV('רואי',
+  ['הארתי','הארת','האיר','האירה','הארנו','הארתם','הארתן','האירו'],
+  ['מאיר','מאירה','מאירים','מאירות'],
+  ['אאיר','תאיר','תאירי','יאיר','נאיר','תאירו','יאירו'],
+  ['האר','האירי']);
+regV('ארט',
+  ['ניסיתי','ניסית','ניסה','ניסתה','ניסינו','ניסיתם','ניסיתן','ניסו'],
+  ['מנסה',null,'מנסים','מנסות'],
+  ['אנסה','תנסה','תנסי','ינסה','ננסה','תנסו','ינסו'],
+  ['נסה','נסי','נסו']);
+regV('קום',
+  ['מצאתי','מצאת','מצא','מצאה','מצאנו','מצאתם','מצאתן','מצאו'],
+  ['מוצא','מוצאת','מוצאים','מוצאות'],
+  ['אמצא','תמצא','תמצאי','ימצא','נמצא','תמצאו','ימצאו'],
+  ['מצאי']);
+regV('רומד',
+  ['איבדתי','איבדת','איבד','איבדה','איבדנו','איבדתם','איבדתן','איבדו'],
+  ['מאבד','מאבדת','מאבדים','מאבדות'],
+  ['אאבד','תאבד','תאבדי','יאבד','נאבד','תאבדו','יאבדו'],
+  []);
+regV('שרם',
+  ['למדתי','למדת','למד','למדה','למדנו','למדתם','למדתן','למדו'],
+  ['לומד','לומדת','לומדים','לומדות'],
+  ['אלמד','תלמד','תלמדי','ילמד','נלמד','תלמדו','ילמדו'],
+  ['למדי']);
+// צריך as adjective-like present form
+regV('מקיג', [],
+  ['צריך','צריכה','צריכים','צריכות'], [], []);
+
+// להיות: standalone "to be" uses ט+suffix, not שרש+suffix
+// past → טיפ, future → טיט (kept in simple dict, not verbInfo)
+['הייתי','היית','הייתה','היינו','הייתם','הייתן','היו'].forEach(f => { if(!dict[f]) dict[f]='טיפ'; });
+['אהיה','תהיה','תהיי','נהיה','תהיו','יהיו'].forEach(f => { if(!dict[f]) dict[f]='טיט'; });
+
+// Multi-word phrases (checked before single words)
+const phrases = {};
+function addPhrase(heb, aya) { phrases[heb] = aya; }
+addPhrase('על לא דבר', 'טמורק קטבמטק');
+addPhrase('חוף ים', 'נקשבי מט דקש');
+addPhrase('בזמן ש', 'שאנם אוטק');
+addPhrase('אותו דבר כמו', 'דשק שד');
+addPhrase('אותו דבר', 'דשק');
+addPhrase('להיות צריך', 'מקיג');
+addPhrase('תחנת מכבי אש', 'קיטונירקיד מאדיש');
+addPhrase('תחנת משטרה', 'מאדש מט פמקוטיד');
+
+// Hebrew prefix letters
+const prefixMap = {
+  'ה': 'איק', 'ו': 'שמג', 'ש': 'אישו',
+  'ב': 'שאנם', 'מ': 'קרים', 'ל': 'אם',
+};
+
+const phraseKeys = Object.keys(phrases).sort((a, b) => b.length - a.length);
+
+// Plural detection
+const ayalitVowels = new Set(['א','ה','ו','י','ע']);
+
+const sofitMap = {'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ'};
+
+function pluralize(ayaWord) {
+  const last = ayaWord[ayaWord.length - 1];
+  const base = sofitMap[last]
+    ? ayaWord.slice(0, -1) + sofitMap[last]
+    : ayaWord;
+  return base + (ayalitVowels.has(base[base.length - 1]) ? 'שיד' : 'יד');
+}
+
+// Irregular plurals that can't be derived by stripping ים/ות
+const irregularPlurals = {
+  'אנשים': 'קשי',      // איש
+  'נשים': 'שמטיק',      // אישה
+  'אחיות': 'דודאקר',    // אחות
+  'בנות': 'איקרגשו',    // בת
+  'ערים': 'בואט',        // עיר
+  'אמהות': 'ממי',       // אמא
+  'אבות': 'ניני',        // אבא
+};
+
+// Convert regular Hebrew letter to its final (sofit) form
+const toSofit = {'כ':'ך','מ':'ם','נ':'ן','פ':'ף','צ':'ץ'};
+function withSofit(stem) {
+  const last = stem[stem.length - 1];
+  return toSofit[last] ? stem.slice(0, -1) + toSofit[last] : null;
+}
+
+// Check if inputWord is a construct plural (סמיכות) of baseWord: חופי→חוף
+function isConstructPl(inputWord, baseWord) {
+  if (!inputWord.endsWith('י')) return false;
+  const stem = inputWord.slice(0, -1);
+  if (stem === baseWord) return true;
+  const last = baseWord[baseWord.length - 1];
+  if (sofitMap[last] && stem === baseWord.slice(0, -1) + sofitMap[last]) return true;
+  return false;
+}
+
+function findSingularAya(word) {
+  if (irregularPlurals[word]) return irregularPlurals[word];
+
+  if (word.length > 2 && word.endsWith('ים')) {
+    const stem = word.slice(0, -2);
+    if (dict[stem]) return dict[stem];
+    const s = withSofit(stem);
+    if (s && dict[s]) return dict[s];           // כלבים→כלב, לימונים→לימון
+    if (dict[stem + 'י']) return dict[stem + 'י']; // תוכים→תוכי
+    if (dict[stem + 'ה']) return dict[stem + 'ה'];
+  }
+  // Construct plural (סמיכות): חופי → חוף
+  if (word.length > 1 && word.endsWith('י')) {
+    const stem = word.slice(0, -1);
+    if (dict[stem]) return dict[stem];
+    const sc = withSofit(stem);
+    if (sc && dict[sc]) return dict[sc];
+  }
+  if (word.length > 2 && word.endsWith('ות')) {
+    const stem = word.slice(0, -2);
+    if (dict[stem + 'ה']) return dict[stem + 'ה']; // ילדות→ילדה
+    if (dict[stem + 'ת']) return dict[stem + 'ת']; // מכוניות→מכונית
+    const s = withSofit(stem);
+    if (s && dict[s]) return dict[s];               // מלונות→מלון
+    if (dict[stem]) return dict[stem];
+  }
+  return null;
+}
+
+// Strip punctuation from a raw token, returns { lead, trail, word }
+function stripPunct(raw) {
+  const leadMatch = raw.match(/^([^\u0590-\u05FF']+)/);
+  const trailMatch = raw.match(/([^\u0590-\u05FF']+)$/);
+  const lead = leadMatch ? leadMatch[1] : '';
+  const trail = trailMatch ? trailMatch[1] : '';
+  const word = raw.slice(lead.length, raw.length - trail.length);
+  return { lead, trail, word };
+}
+
+// Build Ayalit verb phrase: [pronoun?] + שרש/שרקף+tense + verb_root
+function buildVerbPhrase(v, emitted, autoAdd) {
+  const pfx = v.pl ? 'שרקפ' : 'שרש';
+  const sfx = v.t === 'p' ? 'יפ' : v.t === 'r' ? 'ופ' : 'יט';
+  const parts = [];
+  if (v.pr && autoAdd && !emitted.has(v.pr)) {
+    parts.push(v.pr);
+    emitted.add(v.pr);
+  }
+  parts.push(pfx + sfx);
+  parts.push(v.aya);
+  return parts.join(' ');
+}
+
+// Reorder Ayalit statement to question form:
+// statement: subject + body+tense + verb → question: verb + q_tense + subject + body
+const pluralPronounSet = new Set(['דק', 'טמופ', 'איקט']);
+function reorderForQuestion(stmt) {
+  const tokens = stmt.split(/\s+/).filter(Boolean);
+
+  // 1. Body+tense verb phrase: (שרש|שרקפ)(יפ|ופ|יט|וט) + verb
+  const btRe = /^(שרש|שרקפ)(יפ|ופ|יט|וט)$/;
+  for (let k = 0; k < tokens.length; k++) {
+    const m = tokens[k].match(btRe);
+    if (m && k + 1 < tokens.length) {
+      const body = m[1], tense = m[2];
+      const qT = {'יפ':'טיפ','ופ':'טופ','יט':'טיט','וט':'טוט'}[tense];
+      const verb = tokens[k + 1];
+      const subj = tokens.slice(0, k);
+      const rest = tokens.slice(k + 2);
+      return [verb, qT, ...subj, body, ...rest].filter(Boolean).join(' ');
+    }
+  }
+
+  // 2. Copula: שרשוט / שרקפוט + adjective
+  for (let k = 0; k < tokens.length; k++) {
+    if (tokens[k] === 'שרשוט' || tokens[k] === 'שרקפוט') {
+      const pl = tokens[k] === 'שרקפוט';
+      const body = pl ? 'שרקפ' : 'שרש';
+      const adj = tokens[k + 1] || '';
+      const subj = tokens.slice(0, k);
+      const rest = tokens.slice(k + 2);
+      return [adj, 'טוט', ...subj, body, ...rest].filter(Boolean).join(' ');
+    }
+  }
+
+  // 3. Standalone to-be: טיפ / טיט
+  for (let k = 0; k < tokens.length; k++) {
+    if (tokens[k] === 'טיפ' || tokens[k] === 'טיט') {
+      const tobe = tokens[k];
+      const subj = tokens.slice(0, k);
+      const rest = tokens.slice(k + 1);
+      const pl = subj.some(s => pluralPronounSet.has(s));
+      const body = pl ? 'שרקפ' : 'שרש';
+      return [tobe, ...subj, body, ...rest].filter(Boolean).join(' ');
+    }
+  }
+
+  return stmt;
+}
+
+function translate(text) {
+  return text.split('\n').map(line => {
+    let words = line.split(/\s+/).filter(Boolean);
+    if (!words.length) return '';
+
+    // Detect question: האם at start or ? at end
+    let isQuestion = false;
+    if (words.length && stripPunct(words[0]).word === 'האם') {
+      isQuestion = true;
+      words = words.slice(1);
+    }
+    if (words.length) {
+      const last = words[words.length - 1];
+      if (last === '?') {
+        isQuestion = true;
+        words = words.slice(0, -1);
+      } else if (last.endsWith('?')) {
+        isQuestion = true;
+        words = [...words];
+        words[words.length - 1] = last.slice(0, -1);
+        if (!words[words.length - 1]) words.pop();
+      }
+    }
+    if (!words.length) return '';
+
+    const result = [];
+    const emitted = new Set(); // pronouns already emitted in this line
+    let hasSubject = false; // whether a noun/pronoun subject was seen
+    let i = 0;
+
+    function markSubject(aya) {
+      if (pronounSet.has(aya)) emitted.add(aya);
+      if (!nonSubjectAya.has(aya) && !pronounSet.has(aya)) hasSubject = true;
+    }
+
+    while (i < words.length) {
+      // 1. Multi-word phrases (with prefix-aware matching)
+      let matched = false;
+      for (const pKey of phraseKeys) {
+        const pWords = pKey.split(/\s+/);
+        if (i + pWords.length <= words.length) {
+          // Exact match
+          if (words.slice(i, i + pWords.length).join(' ') === pKey) {
+            const phraseAya = phrases[pKey];
+            result.push(phraseAya);
+            markSubject(phraseAya.split(' ')[0]);
+            i += pWords.length;
+            matched = true;
+            break;
+          }
+          // Prefix + construct-plural aware match
+          let pfxParts = [];
+          let pMatch = true;
+          let pPlural = false;
+          for (let j = 0; j < pWords.length; j++) {
+            const { word: iw } = stripPunct(words[i + j]);
+            if (iw === pWords[j]) { /* exact */ }
+            else if (iw.length > 1 && prefixMap[iw[0]] && iw.slice(1) === pWords[j]) {
+              pfxParts.push(prefixMap[iw[0]]);
+            } else if (isConstructPl(iw, pWords[j])) {
+              pPlural = true;
+            } else { pMatch = false; break; }
+          }
+          if (pMatch && (pfxParts.length > 0 || pPlural)) {
+            const { lead } = stripPunct(words[i]);
+            const { trail } = stripPunct(words[i + pWords.length - 1]);
+            let aya = phrases[pKey];
+            if (pPlural) {
+              const ap = aya.split(' ');
+              ap[0] = pluralize(ap[0]);
+              aya = ap.join(' ');
+            }
+            result.push(lead + (pfxParts.length ? pfxParts.join(' ') + ' ' : '') + aya + trail);
+            markSubject(phrases[pKey].split(' ')[0]);
+            i += pWords.length;
+            matched = true;
+            break;
+          }
+        }
+      }
+      if (matched) continue;
+
+      const { lead, trail, word } = stripPunct(words[i]);
+      if (!word) { result.push(words[i]); i++; continue; }
+
+      // 2. Verb conjugation → structured Ayalit verb phrase
+      if (verbInfo[word]) {
+        result.push(lead + buildVerbPhrase(verbInfo[word], emitted, !hasSubject) + trail);
+        i++; continue;
+      }
+
+      // 2b. Copula: הוא/היא/הם/הן before a non-verb → שרשוט / שרקפוט
+      const copulaPlural = {'הוא': false, 'היא': false, 'הם': true, 'הן': true};
+      if (word in copulaPlural && i + 1 < words.length) {
+        const { word: nw } = stripPunct(words[i + 1]);
+        if (!verbInfo[nw]) {
+          const copula = copulaPlural[word] ? 'שרקפוט' : 'שרשוט';
+          if (!hasSubject) {
+            const pronoun = dict[word];
+            result.push(lead + pronoun);
+            emitted.add(pronoun);
+            hasSubject = true;
+          }
+          result.push(copula + trail);
+          i++; continue;
+        }
+      }
+
+      // 2c. Accusative את: skip when followed by ה+noun (object marker, not pronoun)
+      if (word === 'את' && i + 1 < words.length) {
+        const { word: nw } = stripPunct(words[i + 1]);
+        if (nw.length > 1 && nw[0] === 'ה') {
+          i++; continue;
+        }
+      }
+
+      // 3. Simple dictionary
+      if (dict[word]) {
+        const aya = dict[word];
+        result.push(lead + aya + trail);
+        markSubject(aya);
+        i++; continue;
+      }
+
+      // 4. Hebrew prefix stripping
+      if (word.length > 2) {
+        const px = word[0], rest = word.slice(1);
+        if (prefixMap[px]) {
+          if (verbInfo[rest]) {
+            result.push(lead + prefixMap[px] + ' ' + buildVerbPhrase(verbInfo[rest], emitted, !hasSubject) + trail);
+            i++; continue;
+          }
+          if (dict[rest]) {
+            const aya = dict[rest];
+            result.push(lead + prefixMap[px] + ' ' + aya + trail);
+            markSubject(aya);
+            i++; continue;
+          }
+          const singRest = findSingularAya(rest);
+          if (singRest) {
+            result.push(lead + prefixMap[px] + ' ' + pluralize(singRest) + trail);
+            markSubject(singRest);
+            i++; continue;
+          }
+        }
+      }
+
+      // 5. Double prefix stripping (e.g. וה = and+the)
+      if (word.length > 3) {
+        const px1 = word[0], px2 = word[1], rest = word.slice(2);
+        if (prefixMap[px1] && prefixMap[px2]) {
+          const dblPfx = prefixMap[px1] + ' ' + prefixMap[px2];
+          if (verbInfo[rest]) {
+            result.push(lead + dblPfx + ' ' + buildVerbPhrase(verbInfo[rest], emitted, !hasSubject) + trail);
+            i++; continue;
+          }
+          if (dict[rest]) {
+            const aya = dict[rest];
+            result.push(lead + dblPfx + ' ' + aya + trail);
+            markSubject(aya);
+            i++; continue;
+          }
+          const singDbl = findSingularAya(rest);
+          if (singDbl) {
+            result.push(lead + dblPfx + ' ' + pluralize(singDbl) + trail);
+            markSubject(singDbl);
+            i++; continue;
+          }
+        }
+      }
+
+      // 6. Plural detection (strip ים/ות, find singular, add suffix)
+      const singAya = findSingularAya(word);
+      if (singAya) {
+        const pl = pluralize(singAya);
+        result.push(lead + pl + trail);
+        markSubject(singAya);
+        i++; continue;
+      }
+
+      // 7. Unknown — keep as-is
+      result.push(words[i]);
+      i++;
+    }
+    let output = result.join(' ');
+    if (isQuestion) {
+      output = reorderForQuestion(output) + '?';
+    }
+    return output;
+  }).join('\n');
+}
+
+// ========== Reverse translation (Ayalit → Hebrew) ==========
+const revDict = {};
+// First pass: non-infinitives (prefer nouns over verb infinitives like לעשות)
+for (const h in dict) { const a = dict[h]; if (!h.startsWith('ל') && !revDict[a]) revDict[a] = h; }
+// Second pass: fill gaps with infinitives
+for (const h in dict) { const a = dict[h]; if (!revDict[a]) revDict[a] = h; }
+const revPhrases = {};
+for (const h in phrases) { const a = phrases[h]; if (!revPhrases[a]) revPhrases[a] = h; }
+const revPhraseKeys = Object.keys(revPhrases).sort((a,b) => b.length - a.length);
+
+const revVerbLookup = {};
+for (const hf in verbInfo) {
+  const v = verbInfo[hf];
+  if (!revVerbLookup[v.aya]) revVerbLookup[v.aya] = {};
+  const k = v.t + '_' + (v.pr || (v.pl ? '_pl' : '_sg'));
+  if (!revVerbLookup[v.aya][k]) revVerbLookup[v.aya][k] = hf;
+}
+
+const revPrefix = {};
+for (const h in prefixMap) revPrefix[prefixMap[h]] = h;
+
+const revToBe = {
+  p: {'נו':'הייתי','טמו':'היית','טמון':'היית','טמא':'היית','מיק':'היה','דיק':'הייתה','דק':'היינו','טמופ':'הייתם','איקט':'היו'},
+  f: {'נו':'אהיה','טמו':'תהיה','טמון':'תהיה','טמא':'תהיי','מיק':'יהיה','דיק':'תהיה','דק':'נהיה','טמופ':'תהיו','איקט':'יהיו'}
+};
+
+function revPlural(w) {
+  let base = null;
+  if (w.length > 3 && w.endsWith('שיד')) base = w.slice(0, -3);
+  else if (w.length > 2 && w.endsWith('יד')) base = w.slice(0, -2);
+  if (!base) return null;
+  let lb = base;
+  if (!revDict[base]) {
+    const l = base[base.length - 1];
+    if (toSofit[l]) lb = base.slice(0, -1) + toSofit[l];
+  }
+  if (!revDict[lb]) return null;
+  for (const [hp, as] of Object.entries(irregularPlurals)) { if (as === lb) return hp; }
+  const heb = revDict[lb];
+  if (heb.endsWith('ה')) return heb.slice(0, -1) + 'ות';
+  // Convert final sofit letter to regular form before appending ים
+  const lastH = heb[heb.length - 1];
+  const hebBase = sofitMap[lastH] ? heb.slice(0, -1) + sofitMap[lastH] : heb;
+  return hebBase + 'ים';
+}
+
+function revWord(w) { return revDict[w] || revPlural(w) || null; }
+
+function reorderAyaQToStmt(tokens) {
+  const qm = {'טיפ':'יפ','טופ':'ופ','טיט':'יט','טוט':'וט'};
+  for (let k = 0; k < tokens.length; k++) {
+    if (qm[tokens[k]]) {
+      const t = qm[tokens[k]];
+      const va = tokens.slice(0, k);
+      for (let b = k + 1; b < tokens.length; b++) {
+        if (tokens[b] === 'שרש' || tokens[b] === 'שרקפ') {
+          const subj = tokens.slice(k + 1, b);
+          const rest = tokens.slice(b + 1);
+          if (va.length === 0) {
+            const tbm = {'יפ':'טיפ','ופ':'טופ','יט':'טיט','וט':'טוט'};
+            return [...subj, tbm[t], ...rest];
+          }
+          return [...subj, tokens[b] + t, ...va, ...rest];
+        }
+      }
+      break;
+    }
+  }
+  return tokens;
+}
+
+function reverseTranslate(text) {
+  return text.split('\n').map(line => {
+    let words = line.split(/\s+/).filter(Boolean);
+    if (!words.length) return '';
+    let isQ = false;
+    if (words.length) {
+      const last = words[words.length - 1];
+      if (last === '?') { isQ = true; words = words.slice(0, -1); }
+      else if (last.endsWith('?')) { isQ = true; words = [...words]; words[words.length-1] = last.slice(0,-1); if (!words[words.length-1]) words.pop(); }
+    }
+    if (!words.length) return '';
+    if (isQ) words = reorderAyaQToStmt(words);
+
+    const result = [];
+    let i = 0, lastPr = null, lastFemPl = false;
+
+    while (i < words.length) {
+      const { lead, trail, word: w } = stripPunct(words[i]);
+      if (!w) { result.push(words[i]); i++; continue; }
+
+      // 1. Reverse phrases
+      let matched = false;
+      for (const pk of revPhraseKeys) {
+        const pw = pk.split(/\s+/);
+        if (i + pw.length <= words.length && words.slice(i, i + pw.length).map(x => stripPunct(x).word).join(' ') === pk) {
+          const { trail: lastTrail } = stripPunct(words[i + pw.length - 1]);
+          result.push(lead + revPhrases[pk] + lastTrail);
+          i += pw.length; matched = true; break;
+        }
+      }
+      if (matched) continue;
+
+      // 2. Verb phrase: (שרש|שרקפ)(יפ|ופ|יט|וט) + verb_root
+      const bm = w.match(/^(שרש|שרקפ)(יפ|ופ|יט|וט)$/);
+      if (bm && i + 1 < words.length) {
+        const pl = bm[1] === 'שרקפ';
+        const tm = {'יפ':'p','ופ':'r','יט':'f','וט':'s'};
+        const { word: nw, trail: vTrail } = stripPunct(words[i + 1]);
+        const t = tm[bm[2]];
+        if (revVerbLookup[nw]) {
+          let pk;
+          if (t === 'r') pk = pl ? '_pl' : '_sg';        // present: always generic
+          else if (lastPr) pk = lastPr;
+          else pk = pl ? 'איקט' : 'מיק';               // past/future: 3rd person
+          let hv = revVerbLookup[nw][t + '_' + pk] || revDict[nw] || nw;
+          if (lastFemPl && t === 'r' && hv.endsWith('ים')) hv = hv.slice(0, -2) + 'ות';
+          result.push(lead + hv + vTrail);
+          i += 2;
+        } else { i++; } // copula: skip body+tense, adj handled next
+        continue;
+      }
+
+      // 3. Copula skip
+      if (w === 'שרשוט' || w === 'שרקפוט') { i++; continue; }
+
+      // 4. To-be with pronoun context
+      if ((w === 'טיפ' || w === 'טיט') && lastPr) {
+        const t = w === 'טיפ' ? 'p' : 'f';
+        if (revToBe[t][lastPr]) { result.push(lead + revToBe[t][lastPr] + trail); i++; continue; }
+      }
+
+      // 5. Prefix + next word(s)
+      if (revPrefix[w] && i + 1 < words.length) {
+        const px = revPrefix[w];
+        let pfxM = false;
+        for (const pk of revPhraseKeys) {
+          const pw = pk.split(/\s+/);
+          if (i + 1 + pw.length <= words.length && words.slice(i + 1, i + 1 + pw.length).map(x => stripPunct(x).word).join(' ') === pk) {
+            const { trail: lastTrail } = stripPunct(words[i + pw.length]);
+            // Insert prefix before LAST word of Hebrew phrase (construct chain)
+            const hp = revPhrases[pk].split(' ');
+            hp[hp.length - 1] = px + hp[hp.length - 1];
+            result.push(lead + hp.join(' ') + lastTrail); i += 1 + pw.length; pfxM = true; break;
+          }
+        }
+        if (pfxM) continue;
+        const { word: nxW, trail: nxT } = stripPunct(words[i + 1]);
+        let nh = revWord(nxW);
+        if (nh) {
+          if (lastFemPl && nh.endsWith('ים')) nh = nh.slice(0, -2) + 'ות';
+          lastFemPl = nh.endsWith('ות');
+          result.push(lead + px + nh + nxT); i += 2; continue;
+        }
+      }
+
+      // 6. Dict lookup
+      if (revDict[w]) {
+        if (pronounSet.has(w)) lastPr = w;
+        result.push(lead + revDict[w] + trail); i++; continue;
+      }
+
+      // 7. Plural
+      const rp = revPlural(w);
+      if (rp) {
+        let hebPl = rp;
+        if (lastFemPl && hebPl.endsWith('ים')) hebPl = hebPl.slice(0, -2) + 'ות';
+        lastFemPl = hebPl.endsWith('ות');
+        result.push(lead + hebPl + trail); i++; continue;
+      }
+
+      // 8. Unknown
+      result.push(words[i]); i++;
+    }
+
+    let out = result.join(' ');
+    if (isQ) out += '?';
+    return out;
+  }).join('\n');
+}
+
+let updating = false;
+const hebEl = document.getElementById('input-text');
+const ayaEl = document.getElementById('output-text');
+
+hebEl.addEventListener('input', () => {
+  if (updating) return;
+  updating = true;
+  ayaEl.value = translate(hebEl.value);
+  updating = false;
+});
+
+ayaEl.addEventListener('input', () => {
+  if (updating) return;
+  updating = true;
+  hebEl.value = reverseTranslate(ayaEl.value);
+  updating = false;
+});
+</script>
+</body>
+</html>
