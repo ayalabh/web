@@ -64,10 +64,12 @@ export function deserializeObjects(projectData) {
       default: geometry = new THREE.BoxGeometry(1, 1, 1);
     }
 
-    // If we have a custom geometry (from CSG), use BufferGeometry from JSON
+    // If we have a custom geometry (from CSG or drawn shapes), use BufferGeometry from JSON
     if (data.geometry) {
       const loader = new THREE.BufferGeometryLoader();
-      geometry = loader.parse(data.geometry);
+      // toJSON() may wrap in { metadata, data } or be flat — BufferGeometryLoader expects the wrapper
+      const geoJson = data.geometry.data ? data.geometry : { data: data.geometry };
+      geometry = loader.parse(geoJson);
     }
 
     const matOpts = {
@@ -92,6 +94,10 @@ export function deserializeObjects(projectData) {
     mesh.userData.shapeType = data.shapeType;
     mesh.userData.isShape = true;
     mesh.userData.isCSGResult = data.isCSGResult || false;
+    if (data.paintCanvasData) {
+      mesh.userData.pendingPaintData = data.paintCanvasData;
+      mesh.userData.originalColor = data.originalColor || null;
+    }
 
     return mesh;
   });
@@ -104,13 +110,27 @@ function serializeObject(mesh) {
     rotation: { x: mesh.rotation.x, y: mesh.rotation.y, z: mesh.rotation.z },
     scale: { x: mesh.scale.x, y: mesh.scale.y, z: mesh.scale.z },
     color: '#' + mesh.material.color.getHexString(),
-    textureName: mesh.material.map ? mesh.material.map.name : null,
+    textureName: mesh.material.map && !mesh.userData.paintCanvas ? mesh.material.map.name : null,
     isCSGResult: mesh.userData.isCSGResult || false,
+    paintCanvasData: mesh.userData.paintCanvas ? mesh.userData.paintCanvas.toDataURL('image/png') : null,
+    originalColor: mesh.userData.originalColor || null,
   };
 
-  // If CSG result, save geometry
-  if (mesh.userData.isCSGResult) {
-    data.geometry = mesh.geometry.toJSON();
+  // Save geometry for non-standard shapes (CSG results, drawn shapes, etc.)
+  const standardTypes = ['box', 'sphere', 'cylinder', 'cone'];
+  if (mesh.userData.isCSGResult || !standardTypes.includes(mesh.userData.shapeType.toLowerCase())) {
+    // Clone as plain BufferGeometry so toJSON() saves raw attribute data
+    // (parametric geometries like ExtrudeGeometry serialize parameters instead)
+    const plainGeo = new THREE.BufferGeometry();
+    plainGeo.setAttribute('position', mesh.geometry.getAttribute('position'));
+    plainGeo.setAttribute('normal', mesh.geometry.getAttribute('normal'));
+    if (mesh.geometry.getAttribute('uv')) {
+      plainGeo.setAttribute('uv', mesh.geometry.getAttribute('uv'));
+    }
+    if (mesh.geometry.index) {
+      plainGeo.setIndex(mesh.geometry.index);
+    }
+    data.geometry = plainGeo.toJSON();
   }
 
   return data;

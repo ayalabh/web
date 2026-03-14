@@ -178,6 +178,22 @@ export function createCSGCommand(scene, holeObject, affectedObjects, newGeometri
   };
 }
 
+export function createPaintCommand(mesh, oldImageData, newImageData) {
+  return {
+    description: `Paint on ${mesh.userData.shapeType || 'Object'}`,
+    execute() {
+      const ctx = mesh.userData.paintCanvas.getContext('2d');
+      ctx.putImageData(newImageData, 0, 0);
+      mesh.userData.paintTexture.needsUpdate = true;
+    },
+    undo() {
+      const ctx = mesh.userData.paintCanvas.getContext('2d');
+      ctx.putImageData(oldImageData, 0, 0);
+      mesh.userData.paintTexture.needsUpdate = true;
+    }
+  };
+}
+
 // UI update
 function updateHistoryUI() {
   const list = document.getElementById('history-list');

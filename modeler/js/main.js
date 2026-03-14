@@ -3,17 +3,19 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { createShapeMesh, createGhostMesh, getShapeCenter } from './shapes.js';
 import { getSelected, selectObject, deselectObject, refreshOutline, onSelect } from './selection.js';
-import { getCurrentTool, setTool, setCamera, handleToolMouseDown, handleToolMouseMove, handleToolMouseUp, getNDC } from './tools.js';
+import { getCurrentTool, setTool, setCamera, setSolidFloor, getSolidFloor, handleToolMouseDown, handleToolMouseMove, handleToolMouseUp, getNDC } from './tools.js';
 import {
   executeCommand, undo, redo,
   createAddCommand, createDeleteCommand, createDuplicateCommand,
   createColorCommand, createTextureCommand, createCSGCommand,
   createGlowCommand,
+  createPaintCommand,
   refreshHistoryPanel
 } from './history.js';
 import { initShortcuts, toggleShortcutsHelp } from './shortcuts.js';
 import { getTexture, buildTextureGallery } from './textures.js';
 import { initDraw, openDrawModal } from './draw.js';
+import { initBrush, activateBrush, deactivateBrush, isBrushActive, handleBrushMouseDown, handleBrushMouseMove, handleBrushMouseUp, getPaintCanvasDataURL, restorePaintCanvas } from './brush.js';
 import { saveProject, openProject, getProjectList, deleteProject, deserializeObjects, exportGLB } from './storage.js';
 import { initTheme, toggleTheme, getTheme } from './theme.js';
 
@@ -219,8 +221,9 @@ function enterPlacementMode(shapeType) {
     b.classList.toggle('active', b.dataset.shape === shapeType);
   });
 
-  // Deactivate tool buttons
+  // Deactivate tool buttons and brush
   document.querySelectorAll('#tools-group .tool-btn').forEach(b => b.classList.remove('active'));
+  if (isBrushActive()) deactivateBrush();
 
   // Create ghost
   ghostMesh = createGhostMesh(shapeType);
@@ -252,6 +255,7 @@ function handleDrawnMesh(mesh) {
 initDraw(handleDrawnMesh);
 
 function doDraw() {
+  if (isBrushActive()) deactivateBrush();
   openDrawModal(handleDrawnMesh);
 }
 
@@ -273,6 +277,12 @@ canvas.addEventListener('mousedown', (e) => {
     return;
   }
 
+  // Brush mode: intercept left click for painting
+  if (isBrushActive() && e.button === 0) {
+    handleBrushMouseDown(e);
+    return;
+  }
+
   // Camera mode: let orbit controls handle left click
   if (getCurrentTool() === 'camera' && e.button === 0) {
     return;
@@ -282,6 +292,11 @@ canvas.addEventListener('mousedown', (e) => {
 });
 
 canvas.addEventListener('mousemove', (e) => {
+  if (isBrushActive()) {
+    handleBrushMouseMove(e);
+    return;
+  }
+
   if (placementMode && ghostMesh) {
     const point = getGridPoint(e);
     if (point) {
@@ -297,6 +312,10 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 canvas.addEventListener('mouseup', (e) => {
+  if (isBrushActive()) {
+    handleBrushMouseUp(e);
+    return;
+  }
   handleToolMouseUp(e, orbitControls);
 });
 
@@ -336,6 +355,7 @@ document.querySelectorAll('#tools-group .tool-btn').forEach(btn => {
 document.querySelectorAll('#tools-group .tool-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     exitPlacementMode();
+    if (isBrushActive()) deactivateBrush();
     setTool(btn.dataset.tool);
   });
 });
@@ -463,6 +483,16 @@ document.querySelector('#history-panel .panel-close').addEventListener('click', 
 // Help button
 document.getElementById('action-help').addEventListener('click', toggleShortcutsHelp);
 
+// Brush
+document.getElementById('action-brush').addEventListener('click', () => {
+  if (isBrushActive()) deactivateBrush();
+  else activateBrush();
+});
+
+initBrush(raycaster, camera, getSceneObjects, (mesh, oldImageData, newImageData) => {
+  executeCommand(createPaintCommand(mesh, oldImageData, newImageData));
+});
+
 // Glow
 const glowBtn = document.getElementById('action-glow');
 glowBtn.addEventListener('click', doGlow);
@@ -576,6 +606,11 @@ function loadProject(name) {
         mesh.material.needsUpdate = true;
       }
       delete mesh.material.userData.pendingTexture;
+    }
+    // Restore paint canvas
+    if (mesh.userData.pendingPaintData) {
+      restorePaintCanvas(mesh, mesh.userData.pendingPaintData);
+      delete mesh.userData.pendingPaintData;
     }
     scene.add(mesh);
   });
@@ -734,6 +769,14 @@ function takeScreenshot() {
   }
 }
 
+// Solid Floor toggle
+const solidFloorBtn = document.getElementById('action-solid-floor');
+solidFloorBtn.addEventListener('click', () => {
+  const newVal = !getSolidFloor();
+  setSolidFloor(newVal);
+  solidFloorBtn.classList.toggle('active', newVal);
+});
+
 document.getElementById('action-preview').addEventListener('click', enterPreview);
 document.getElementById('preview-exit').addEventListener('click', exitPreview);
 document.getElementById('preview-screenshot').addEventListener('click', takeScreenshot);
@@ -770,6 +813,7 @@ initShortcuts({
   floorColor: () => { floorColorInput.value = '#' + floorMaterial.color.getHexString(); floorColorInput.click(); },
   wallColor: () => { wallColorInput.value = '#' + wallMaterial.color.getHexString(); wallColorInput.click(); },
   draw: doDraw,
+  brush: () => { if (isBrushActive()) deactivateBrush(); else activateBrush(); },
   placeShape: (type) => enterPlacementMode(type),
   preview: enterPreview,
   exitPreview: () => { if (previewMode) exitPreview(); },

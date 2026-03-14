@@ -96,6 +96,10 @@
     <div class="toolbar-spacer"></div>
 
     <div class="toolbar-group" id="file-group">
+      <button id="action-solid-floor" class="tool-btn" title="Solid Floor — prevent objects going below floor">
+        <img class="tool-icon" src="icons/arrow-down-to-line.svg" alt="Solid Floor">
+        <span class="tool-label">Clamp</span>
+      </button>
       <button id="action-preview" class="tool-btn" title="Preview (P)">
         <img class="tool-icon" src="icons/eye.svg" alt="Preview">
         <span class="tool-label">Preview</span>
@@ -143,6 +147,13 @@
         <button class="shape-btn" id="draw-btn" title="Draw Shape (Shift+D)">
           <img class="shape-icon" src="icons/pencil.svg" alt="Draw">
           <span class="shape-label">Draw</span>
+        </button>
+
+        <div class="left-toolbar-divider"></div>
+
+        <button class="shape-btn" id="action-brush" title="Brush (K)">
+          <img class="shape-icon" src="icons/brush.svg" alt="Brush">
+          <span class="shape-label">Brush</span>
         </button>
 
         <div class="left-toolbar-divider"></div>
@@ -237,6 +248,26 @@
         <button class="modal-close">&times;</button>
       </div>
       <div id="project-list" class="project-list"></div>
+    </div>
+  </div>
+
+  <!-- Brush Panel -->
+  <div id="brush-panel" class="panel hidden" style="left: 80px; top: 62px; right: auto; width: 200px;">
+    <div class="panel-header">
+      <h3>Brush</h3>
+      <button class="panel-close">&times;</button>
+    </div>
+    <div style="padding: 12px;">
+      <label style="display:block; font-size:12px; margin-bottom:8px;">
+        Color
+        <input type="color" id="brush-color" value="#ff0000" style="width:100%; height:30px; border:none; cursor:pointer;">
+      </label>
+      <label style="display:block; font-size:12px; margin-bottom:8px;">
+        Size <span id="brush-size-label">10</span>
+        <input type="range" id="brush-size" min="2" max="40" value="10" style="width:100%;">
+      </label>
+      <div style="font-size:12px; margin-bottom:6px;">Stamps</div>
+      <div id="stamp-grid"></div>
     </div>
   </div>
 

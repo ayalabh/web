@@ -548,6 +548,46 @@ img.shape-icon {
   margin-left: 12px;
 }
 
+/* Brush Panel */
+#stamp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.stamp-btn {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+  padding: 4px;
+}
+
+.stamp-btn:hover {
+  border-color: var(--selection-glow);
+}
+
+.stamp-btn.active {
+  border-color: var(--bg-toolbar-active);
+  background: var(--bg-toolbar-hover);
+}
+
+.stamp-btn canvas {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+body.brush-mode #workspace {
+  cursor: crosshair;
+}
+
 /* Draw Modal */
 .draw-modal-content {
   min-width: 540px;

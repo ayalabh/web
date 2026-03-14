@@ -104,6 +104,7 @@ export function initShortcuts(actionHandlers) {
       case 't': handlers.texture?.(); break;
       case 'l': handlers.color?.(); break;
       case 'g': handlers.glow?.(); break;
+      case 'k': handlers.brush?.(); break;
       case 'h': handlers.hole?.(); break;
       case 'p': handlers.preview?.(); break;
       case 'delete':
@@ -142,6 +143,7 @@ export function toggleShortcutsHelp() {
       ['T', 'Open texture gallery'],
       ['L', 'Open color picker'],
       ['G', 'Toggle glow'],
+      ['K', 'Brush tool (paint on surfaces)'],
       ['H', 'Hole mode (CSG subtract)'],
     ]],
     ['History', [
