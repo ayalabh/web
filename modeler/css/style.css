@@ -24,12 +24,97 @@ body {
   padding: 0 8px;
   z-index: 10;
   flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .toolbar-group {
   display: flex;
   align-items: center;
   gap: 2px;
+}
+
+/* Category system */
+.toolbar-category {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-category);
+  border-radius: 8px;
+  padding: 2px 4px;
+}
+
+.category-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--category-label-color);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+  width: 48px;
+  height: 44px;
+  gap: 1px;
+  transition: background 0.15s;
+}
+
+.category-header:hover {
+  background: var(--bg-toolbar-hover);
+}
+
+.category-icon {
+  width: 20px;
+  height: 20px;
+  filter: var(--category-icon-filter);
+  pointer-events: none;
+}
+
+.category-name {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--category-label-color);
+}
+
+.category-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.category-more {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.category-more:hover {
+  background: var(--bg-toolbar-hover);
+}
+
+/* Collapsed: hide all buttons except the "last used" one, show "..." */
+.toolbar-category.collapsed .category-buttons .tool-btn {
+  display: none;
+}
+
+.toolbar-category.collapsed .category-buttons .tool-btn.cat-last-used {
+  display: flex;
+}
+
+.toolbar-category.collapsed .category-more {
+  display: flex;
 }
 
 .toolbar-divider {

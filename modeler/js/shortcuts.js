@@ -79,6 +79,11 @@ export function initShortcuts(actionHandlers) {
           e.preventDefault();
           setTool('camera');
           return;
+        case 'g':
+          e.preventDefault();
+          if (shift) handlers.ungroup?.();
+          else handlers.group?.();
+          return;
       }
       return;
     }
@@ -106,6 +111,7 @@ export function initShortcuts(actionHandlers) {
       case 'g': handlers.glow?.(); break;
       case 'k': handlers.brush?.(); break;
       case 'h': handlers.hole?.(); break;
+      case 'j': handlers.split?.(); break;
       case 'p': handlers.preview?.(); break;
       case 'delete':
       case 'backspace':
@@ -145,6 +151,9 @@ export function toggleShortcutsHelp() {
       ['G', 'Toggle glow'],
       ['K', 'Brush tool (paint on surfaces)'],
       ['H', 'Hole mode (CSG subtract)'],
+      ['J', 'Split (CSG split)'],
+      ['Ctrl+G', 'Group selected objects'],
+      ['Ctrl+Shift+G', 'Ungroup'],
     ]],
     ['History', [
       ['Ctrl+Z', 'Undo'],

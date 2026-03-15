@@ -22,6 +22,9 @@
   --scrollbar-track: #1a1a2e;
   --scrollbar-thumb: #333355;
   --shadow: rgba(0, 0, 0, 0.4);
+  --bg-category: rgba(255, 255, 255, 0.06);
+  --category-label-color: #6aafea;
+  --category-icon-filter: brightness(0) saturate(100%) invert(68%) sepia(52%) saturate(450%) hue-rotate(178deg) brightness(98%) contrast(90%);
   --icon-filter: brightness(0) invert(0.85);
 }
 
@@ -49,5 +52,8 @@
   --scrollbar-track: #e8e8ec;
   --scrollbar-thumb: #c0c0cc;
   --shadow: rgba(0, 0, 0, 0.15);
+  --bg-category: rgba(0, 0, 0, 0.06);
+  --category-label-color: #2a6faa;
+  --category-icon-filter: brightness(0) saturate(100%) invert(38%) sepia(60%) saturate(600%) hue-rotate(185deg) brightness(90%) contrast(90%);
   --icon-filter: brightness(0) invert(0.15);
 }

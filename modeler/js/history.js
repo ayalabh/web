@@ -110,6 +110,22 @@ export function createColorCommand(mesh, oldColor, newColor) {
   };
 }
 
+export function createOpacityCommand(mesh, oldOpacity, newOpacity) {
+  return {
+    description: `Opacity ${mesh.userData.shapeType || 'Object'}`,
+    execute() {
+      mesh.material.opacity = newOpacity;
+      mesh.material.transparent = newOpacity < 1;
+      mesh.material.needsUpdate = true;
+    },
+    undo() {
+      mesh.material.opacity = oldOpacity;
+      mesh.material.transparent = oldOpacity < 1;
+      mesh.material.needsUpdate = true;
+    }
+  };
+}
+
 export function createTextureCommand(mesh, oldMap, newMap, oldColor, newColor) {
   return {
     description: `Texture ${mesh.userData.shapeType || 'Object'}`,
@@ -174,6 +190,112 @@ export function createCSGCommand(scene, holeObject, affectedObjects, newGeometri
         affectedObjects[i].geometry = oldGeometries[i];
       }
       scene.add(holeObject);
+    }
+  };
+}
+
+export function createSplitCommand(scene, splitterObject, affectedObjects, oldGeometries, outsideGeometries, insideMeshes, deselectFn) {
+  return {
+    description: `Split (CSG)`,
+    execute() {
+      if (deselectFn) deselectFn();
+      // Replace affected objects' geometry with outside part
+      for (let i = 0; i < affectedObjects.length; i++) {
+        affectedObjects[i].geometry.dispose();
+        affectedObjects[i].geometry = outsideGeometries[i];
+        affectedObjects[i].userData.isCSGResult = true;
+      }
+      // Add inside meshes
+      for (const mesh of insideMeshes) {
+        scene.add(mesh);
+      }
+      // Remove splitter
+      scene.remove(splitterObject);
+    },
+    undo() {
+      // Restore original geometries
+      for (let i = 0; i < affectedObjects.length; i++) {
+        affectedObjects[i].geometry.dispose();
+        affectedObjects[i].geometry = oldGeometries[i];
+      }
+      // Remove inside meshes
+      for (const mesh of insideMeshes) {
+        scene.remove(mesh);
+      }
+      // Restore splitter
+      scene.add(splitterObject);
+    }
+  };
+}
+
+export function createGroupCommand(scene, meshes, group, deselectFn) {
+  // Store each mesh's world position/rotation/scale before grouping
+  const savedTransforms = meshes.map(m => ({
+    pos: m.position.clone(),
+    rot: m.rotation.clone(),
+    scale: m.scale.clone(),
+  }));
+
+  return {
+    description: `Group ${meshes.length} objects`,
+    execute() {
+      if (deselectFn) deselectFn();
+      for (const mesh of meshes) {
+        scene.remove(mesh);
+        group.add(mesh);
+      }
+      scene.add(group);
+    },
+    undo() {
+      if (deselectFn) deselectFn();
+      scene.remove(group);
+      meshes.forEach((mesh, i) => {
+        group.remove(mesh);
+        // Restore original world transforms
+        mesh.position.copy(savedTransforms[i].pos);
+        mesh.rotation.copy(savedTransforms[i].rot);
+        mesh.scale.copy(savedTransforms[i].scale);
+        scene.add(mesh);
+      });
+    }
+  };
+}
+
+export function createUngroupCommand(scene, group, meshes, savedTransforms, deselectFn) {
+  return {
+    description: `Ungroup ${meshes.length} objects`,
+    execute() {
+      if (deselectFn) deselectFn();
+      scene.remove(group);
+      meshes.forEach((mesh, i) => {
+        group.remove(mesh);
+        mesh.position.copy(savedTransforms[i].pos);
+        mesh.rotation.copy(savedTransforms[i].rot);
+        mesh.scale.copy(savedTransforms[i].scale);
+        scene.add(mesh);
+      });
+    },
+    undo() {
+      if (deselectFn) deselectFn();
+      for (const mesh of meshes) {
+        scene.remove(mesh);
+        // Restore the mesh's local transform relative to group
+      }
+      // Re-add group with children
+      meshes.forEach(mesh => group.add(mesh));
+      scene.add(group);
+    }
+  };
+}
+
+export function createCompositeCommand(subCommands, description) {
+  return {
+    description: description || `${subCommands.length} actions`,
+    execute() { subCommands.forEach(cmd => cmd.execute()); },
+    undo() {
+      for (let i = subCommands.length - 1; i >= 0; i--) {
+        subCommands[i].undo();
+      }
     }
   };
 }

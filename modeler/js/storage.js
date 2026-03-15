@@ -53,57 +53,93 @@ export function deleteProject(projectName) {
   localStorage.setItem(PROJECT_LIST_KEY, JSON.stringify(list));
 }
 
-export function deserializeObjects(projectData) {
-  return projectData.objects.map(data => {
-    let geometry;
-    switch (data.shapeType.toLowerCase()) {
-      case 'box': geometry = new THREE.BoxGeometry(1, 1, 1); break;
-      case 'sphere': geometry = new THREE.SphereGeometry(0.5, 32, 32); break;
-      case 'cylinder': geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32); break;
-      case 'cone': geometry = new THREE.ConeGeometry(0.5, 1, 32); break;
-      default: geometry = new THREE.BoxGeometry(1, 1, 1);
+function deserializeMesh(data) {
+  // Handle groups recursively
+  if (data.isGroup) {
+    const group = new THREE.Group();
+    group.position.set(data.position.x, data.position.y, data.position.z);
+    group.rotation.set(data.rotation.x, data.rotation.y, data.rotation.z);
+    group.scale.set(data.scale.x, data.scale.y, data.scale.z);
+    group.userData.isShape = true;
+    group.userData.isGroup = true;
+    group.userData.shapeType = 'Group';
+    if (data.children) {
+      data.children.forEach(childData => {
+        group.add(deserializeMesh(childData));
+      });
     }
+    return group;
+  }
 
-    // If we have a custom geometry (from CSG or drawn shapes), use BufferGeometry from JSON
-    if (data.geometry) {
-      const loader = new THREE.BufferGeometryLoader();
-      // toJSON() may wrap in { metadata, data } or be flat — BufferGeometryLoader expects the wrapper
-      const geoJson = data.geometry.data ? data.geometry : { data: data.geometry };
-      geometry = loader.parse(geoJson);
-    }
+  let geometry;
+  switch (data.shapeType.toLowerCase()) {
+    case 'box': geometry = new THREE.BoxGeometry(1, 1, 1); break;
+    case 'sphere': geometry = new THREE.SphereGeometry(0.5, 32, 32); break;
+    case 'cylinder': geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32); break;
+    case 'cone': geometry = new THREE.ConeGeometry(0.5, 1, 32); break;
+    default: geometry = new THREE.BoxGeometry(1, 1, 1);
+  }
 
-    const matOpts = {
-      color: new THREE.Color(data.color || '#cccccc'),
-      roughness: 0.6,
-      metalness: 0.1,
-    };
+  if (data.geometry) {
+    const loader = new THREE.BufferGeometryLoader();
+    const geoJson = data.geometry.data ? data.geometry : { data: data.geometry };
+    geometry = loader.parse(geoJson);
+  }
 
-    const material = new THREE.MeshStandardMaterial(matOpts);
+  const matOpts = {
+    color: new THREE.Color(data.color || '#cccccc'),
+    roughness: 0.6,
+    metalness: 0.1,
+  };
 
-    if (data.textureName) {
-      // Texture will be applied after import via textures.js
-      material.userData.pendingTexture = data.textureName;
-    }
+  if (data.opacity !== undefined && data.opacity < 1) {
+    matOpts.opacity = data.opacity;
+    matOpts.transparent = true;
+  }
 
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(data.position.x, data.position.y, data.position.z);
-    mesh.rotation.set(data.rotation.x, data.rotation.y, data.rotation.z);
-    mesh.scale.set(data.scale.x, data.scale.y, data.scale.z);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    mesh.userData.shapeType = data.shapeType;
-    mesh.userData.isShape = true;
-    mesh.userData.isCSGResult = data.isCSGResult || false;
-    if (data.paintCanvasData) {
-      mesh.userData.pendingPaintData = data.paintCanvasData;
-      mesh.userData.originalColor = data.originalColor || null;
-    }
+  const material = new THREE.MeshStandardMaterial(matOpts);
 
-    return mesh;
-  });
+  if (data.textureName) {
+    material.userData.pendingTexture = data.textureName;
+  }
+
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(data.position.x, data.position.y, data.position.z);
+  mesh.rotation.set(data.rotation.x, data.rotation.y, data.rotation.z);
+  mesh.scale.set(data.scale.x, data.scale.y, data.scale.z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.userData.shapeType = data.shapeType;
+  mesh.userData.isShape = true;
+  mesh.userData.isCSGResult = data.isCSGResult || false;
+  if (data.paintCanvasData) {
+    mesh.userData.pendingPaintData = data.paintCanvasData;
+    mesh.userData.originalColor = data.originalColor || null;
+  }
+
+  return mesh;
 }
 
-function serializeObject(mesh) {
+export function deserializeObjects(projectData) {
+  return projectData.objects.map(data => deserializeMesh(data));
+}
+
+function serializeObject(obj) {
+  // Handle groups
+  if (obj.userData.isGroup) {
+    return {
+      shapeType: 'Group',
+      isGroup: true,
+      position: { x: obj.position.x, y: obj.position.y, z: obj.position.z },
+      rotation: { x: obj.rotation.x, y: obj.rotation.y, z: obj.rotation.z },
+      scale: { x: obj.scale.x, y: obj.scale.y, z: obj.scale.z },
+      children: obj.children
+        .filter(c => c.userData.isShape && !c.userData.isOutline)
+        .map(c => serializeObject(c)),
+    };
+  }
+
+  const mesh = obj;
   const data = {
     shapeType: mesh.userData.shapeType,
     position: { x: mesh.position.x, y: mesh.position.y, z: mesh.position.z },
@@ -112,6 +148,7 @@ function serializeObject(mesh) {
     color: '#' + mesh.material.color.getHexString(),
     textureName: mesh.material.map && !mesh.userData.paintCanvas ? mesh.material.map.name : null,
     isCSGResult: mesh.userData.isCSGResult || false,
+    opacity: mesh.material.opacity,
     paintCanvasData: mesh.userData.paintCanvas ? mesh.userData.paintCanvas.toDataURL('image/png') : null,
     originalColor: mesh.userData.originalColor || null,
   };
@@ -119,8 +156,6 @@ function serializeObject(mesh) {
   // Save geometry for non-standard shapes (CSG results, drawn shapes, etc.)
   const standardTypes = ['box', 'sphere', 'cylinder', 'cone'];
   if (mesh.userData.isCSGResult || !standardTypes.includes(mesh.userData.shapeType.toLowerCase())) {
-    // Clone as plain BufferGeometry so toJSON() saves raw attribute data
-    // (parametric geometries like ExtrudeGeometry serialize parameters instead)
     const plainGeo = new THREE.BufferGeometry();
     plainGeo.setAttribute('position', mesh.geometry.getAttribute('position'));
     plainGeo.setAttribute('normal', mesh.geometry.getAttribute('normal'));

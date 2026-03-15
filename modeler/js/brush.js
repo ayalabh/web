@@ -25,7 +25,7 @@ export function activateBrush() {
   document.getElementById('brush-panel').classList.remove('hidden');
   document.getElementById('action-brush').classList.add('active');
   // Deactivate tool buttons
-  document.querySelectorAll('#tools-group .tool-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.remove('active'));
 }
 
 export function deactivateBrush() {
@@ -184,7 +184,7 @@ function raycastUV(e) {
   );
   _raycaster.setFromCamera(mouse, _camera);
   const objects = _objects();
-  const intersects = _raycaster.intersectObjects(objects, false);
+  const intersects = _raycaster.intersectObjects(objects, true);
   if (intersects.length > 0 && intersects[0].uv) {
     return { mesh: intersects[0].object, uv: intersects[0].uv };
   }
@@ -204,6 +204,15 @@ function paintAt(canvas, uv, size, color) {
 }
 
 function interpolatePaint(canvas, fromUV, toUV, size, color) {
+  // Detect UV seam crossing — large jump means we crossed a wrap boundary
+  const jumpX = Math.abs(toUV.x - fromUV.x);
+  const jumpY = Math.abs(toUV.y - fromUV.y);
+  if (jumpX > 0.3 || jumpY > 0.3) {
+    // Seam crossed — just paint at the new point, don't interpolate
+    paintAt(canvas, toUV, size, color);
+    return;
+  }
+
   const dx = (toUV.x - fromUV.x) * canvas.width;
   const dy = (toUV.y - fromUV.y) * canvas.height;
   const dist = Math.sqrt(dx * dx + dy * dy);

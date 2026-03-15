@@ -2,14 +2,16 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { createShapeMesh, createGhostMesh, getShapeCenter } from './shapes.js';
-import { getSelected, selectObject, deselectObject, refreshOutline, onSelect } from './selection.js';
+import { getSelected, getSelectedAll, selectObject, deselectObject, toggleSelectObject, findSelectable, refreshOutline, onSelect } from './selection.js';
 import { getCurrentTool, setTool, setCamera, setSolidFloor, getSolidFloor, handleToolMouseDown, handleToolMouseMove, handleToolMouseUp, getNDC } from './tools.js';
 import {
   executeCommand, undo, redo,
   createAddCommand, createDeleteCommand, createDuplicateCommand,
-  createColorCommand, createTextureCommand, createCSGCommand,
+  createColorCommand, createTextureCommand, createCSGCommand, createSplitCommand, createGroupCommand, createUngroupCommand,
   createGlowCommand,
+  createOpacityCommand,
   createPaintCommand,
+  createCompositeCommand,
   refreshHistoryPanel
 } from './history.js';
 import { initShortcuts, toggleShortcutsHelp } from './shortcuts.js';
@@ -18,6 +20,8 @@ import { initDraw, openDrawModal } from './draw.js';
 import { initBrush, activateBrush, deactivateBrush, isBrushActive, handleBrushMouseDown, handleBrushMouseMove, handleBrushMouseUp, getPaintCanvasDataURL, restorePaintCanvas } from './brush.js';
 import { saveProject, openProject, getProjectList, deleteProject, deserializeObjects, exportGLB } from './storage.js';
 import { initTheme, toggleTheme, getTheme } from './theme.js';
+import { initCategories } from './categories.js';
+import { performCSGSubtraction, performCSGSplit } from './csg.js';
 
 // ==================== Scene Setup ====================
 const canvas = document.getElementById('three-canvas');
@@ -175,6 +179,7 @@ window.addEventListener('resize', resize);
 
 // ==================== Theme ====================
 initTheme();
+initCategories();
 let wallColor = localStorage.getItem('shape-modeler-wall-color') || null;
 let floorColor = localStorage.getItem('shape-modeler-floor-color') || null;
 
@@ -222,7 +227,7 @@ function enterPlacementMode(shapeType) {
   });
 
   // Deactivate tool buttons and brush
-  document.querySelectorAll('#tools-group .tool-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.remove('active'));
   if (isBrushActive()) deactivateBrush();
 
   // Create ghost
@@ -345,14 +350,14 @@ function updateOrbitForTool() {
 const originalSetTool = setTool;
 // We'll watch for tool changes via MutationObserver on tool buttons
 const toolsObserver = new MutationObserver(() => updateOrbitForTool());
-document.querySelectorAll('#tools-group .tool-btn').forEach(btn => {
+document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
   toolsObserver.observe(btn, { attributes: true, attributeFilter: ['class'] });
 });
 
 // ==================== Top Toolbar Buttons ====================
 
-// Tool buttons
-document.querySelectorAll('#tools-group .tool-btn').forEach(btn => {
+// Tool buttons (all buttons with data-tool, across categories)
+document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
   btn.addEventListener('click', () => {
     exitPlacementMode();
     if (isBrushActive()) deactivateBrush();
@@ -363,75 +368,193 @@ document.querySelectorAll('#tools-group .tool-btn').forEach(btn => {
 // Delete
 document.getElementById('action-delete').addEventListener('click', doDelete);
 function doDelete() {
-  const sel = getSelected();
-  if (!sel) return;
-  executeCommand(createDeleteCommand(scene, sel, () => deselectObject(scene)));
+  const all = getSelectedAll();
+  if (all.length === 0) return;
+  deselectObject(scene);
+  if (all.length === 1) {
+    executeCommand(createDeleteCommand(scene, all[0], null));
+  } else {
+    const subCmds = all.map(obj => createDeleteCommand(scene, obj, null));
+    executeCommand(createCompositeCommand(subCmds, `Delete ${all.length} objects`));
+  }
 }
 
 // Duplicate
 document.getElementById('action-duplicate').addEventListener('click', doDuplicate);
 function doDuplicate() {
-  const sel = getSelected();
-  if (!sel) return;
+  const all = getSelectedAll();
+  if (all.length === 0) return;
 
-  const clone = sel.clone();
-  clone.material = sel.material.clone();
-  if (sel.material.map) {
-    clone.material.map = sel.material.map;
+  const clones = [];
+  const subCmds = [];
+  all.forEach(sel => {
+    const clone = sel.clone();
+    clone.material = sel.material.clone();
+    if (sel.material.map) clone.material.map = sel.material.map;
+    clone.position.x += 1;
+    clone.position.z += 1;
+    clone.userData = { ...sel.userData, isGlowing: false };
+    clone.children = clone.children.filter(c => !c.userData?.isOutline && !c.userData?.isGlowLight);
+    subCmds.push(createDuplicateCommand(scene, sel, clone));
+    if (sel.userData.isGlowing) {
+      clone.material.emissive = clone.material.color.clone();
+      clone.material.emissiveIntensity = 0.3;
+      clone.userData.isGlowing = true;
+      addGlowLight(clone);
+    }
+    clones.push(clone);
+  });
+
+  if (subCmds.length === 1) {
+    executeCommand(subCmds[0]);
+  } else {
+    executeCommand(createCompositeCommand(subCmds, `Duplicate ${all.length} objects`));
   }
-  clone.position.x += 1;
-  clone.position.z += 1;
-  clone.userData = { ...sel.userData, isGlowing: false };
-  // Remove outline and glow light children from clone
-  clone.children = clone.children.filter(c => !c.userData?.isOutline && !c.userData?.isGlowLight);
 
-  executeCommand(createDuplicateCommand(scene, sel, clone));
-
-  // If original was glowing, make clone glow too
-  if (sel.userData.isGlowing) {
-    clone.material.emissive = clone.material.color.clone();
-    clone.material.emissiveIntensity = 0.3;
-    clone.userData.isGlowing = true;
-    addGlowLight(clone);
+  // Select the clones
+  if (clones.length > 0) {
+    selectObject(clones[0], scene);
+    clones.slice(1).forEach(c => toggleSelectObject(c, scene));
   }
-  selectObject(clone, scene);
 }
 
 // Color
 document.getElementById('action-color').addEventListener('click', doColor);
 const colorInput = document.getElementById('color-picker-input');
+const colorPanel = document.getElementById('color-panel');
+const opacitySlider = document.getElementById('opacity-slider');
+const opacityLabel = document.getElementById('opacity-label');
+
+// Track starting colors/opacities so we only add one history entry per drag
+let colorDragStartColors = null;
+let opacityDragStartValues = null;
+
+// Live preview while dragging — no history entry
 colorInput.addEventListener('input', (e) => {
-  const sel = getSelected();
-  if (!sel) return;
-  const oldColor = '#' + sel.material.color.getHexString();
+  const all = getSelectedAll();
+  if (all.length === 0) return;
+  // Capture start colors on first input event of a drag
+  if (!colorDragStartColors) {
+    colorDragStartColors = all.map(obj => '#' + obj.material.color.getHexString());
+  }
   const newColor = e.target.value;
-  executeCommand(createColorCommand(sel, oldColor, newColor));
+  all.forEach(obj => obj.material.color.set(newColor));
 });
+
+// Commit to history when drag ends
+colorInput.addEventListener('change', (e) => {
+  const all = getSelectedAll();
+  if (all.length === 0 || !colorDragStartColors) return;
+  const newColor = e.target.value;
+  const startColors = colorDragStartColors;
+  colorDragStartColors = null;
+  // Restore start colors so executeCommand's execute() applies the change
+  all.forEach((obj, i) => obj.material.color.set(startColors[i]));
+  if (all.length === 1) {
+    executeCommand(createColorCommand(all[0], startColors[0], newColor));
+  } else {
+    const subCmds = all.map((obj, i) => createColorCommand(obj, startColors[i], newColor));
+    executeCommand(createCompositeCommand(subCmds, `Color ${all.length} objects`));
+  }
+});
+
+// Live preview while dragging opacity
+opacitySlider.addEventListener('input', (e) => {
+  const all = getSelectedAll();
+  if (all.length === 0) return;
+  if (!opacityDragStartValues) {
+    opacityDragStartValues = all.map(obj => obj.material.opacity);
+  }
+  const newOpacity = parseInt(e.target.value) / 100;
+  opacityLabel.textContent = e.target.value + '%';
+  all.forEach(obj => {
+    obj.material.opacity = newOpacity;
+    obj.material.transparent = newOpacity < 1;
+    obj.material.needsUpdate = true;
+  });
+});
+
+// Commit opacity to history when drag ends
+opacitySlider.addEventListener('change', (e) => {
+  const all = getSelectedAll();
+  if (all.length === 0 || !opacityDragStartValues) return;
+  const newOpacity = parseInt(e.target.value) / 100;
+  const startValues = opacityDragStartValues;
+  opacityDragStartValues = null;
+  // Restore start values so executeCommand's execute() applies the change
+  all.forEach((obj, i) => {
+    obj.material.opacity = startValues[i];
+    obj.material.transparent = startValues[i] < 1;
+    obj.material.needsUpdate = true;
+  });
+  if (all.length === 1) {
+    executeCommand(createOpacityCommand(all[0], startValues[0], newOpacity));
+  } else {
+    const subCmds = all.map((obj, i) => createOpacityCommand(obj, startValues[i], newOpacity));
+    executeCommand(createCompositeCommand(subCmds, `Opacity ${all.length} objects`));
+  }
+});
+
+document.querySelector('#color-panel .panel-close').addEventListener('click', () => {
+  colorPanel.classList.add('hidden');
+});
+
+// Update color panel when selection changes
+onSelect((mesh) => {
+  if (!colorPanel.classList.contains('hidden') && mesh) {
+    colorInput.value = '#' + mesh.material.color.getHexString();
+    opacitySlider.value = Math.round(mesh.material.opacity * 100);
+    opacityLabel.textContent = opacitySlider.value + '%';
+  }
+});
+
 function doColor() {
   const sel = getSelected();
   if (!sel) return;
   colorInput.value = '#' + sel.material.color.getHexString();
-  colorInput.click();
+  opacitySlider.value = Math.round(sel.material.opacity * 100);
+  opacityLabel.textContent = opacitySlider.value + '%';
+  colorPanel.classList.toggle('hidden');
 }
 
 // Texture
 document.getElementById('action-texture').addEventListener('click', doTexture);
 function doTexture() {
-  const sel = getSelected();
-  if (!sel) return;
+  const all = getSelectedAll();
+  if (all.length === 0) return;
   const modal = document.getElementById('texture-modal');
   buildTextureGallery((textureName) => {
-    const oldMap = sel.material.map;
-    const oldColor = '#' + sel.material.color.getHexString();
-    let newMap = null;
-    let newColor = undefined;
+    const buildCmd = (obj) => {
+      const oldMap = obj.material.map;
+      const oldColor = '#' + obj.material.color.getHexString();
+      let newMap = null;
+      let newColor = undefined;
+      if (textureName) {
+        newMap = getTexture(textureName);
+        newColor = '#ffffff';
+        // Save the real color before texture overwrites it to white
+        if (!obj.userData.originalColor && !obj.userData.paintCanvas) {
+          obj.userData.originalColor = oldColor;
+        }
+      } else {
+        // "No Texture": if painted, keep paint canvas; otherwise restore original color
+        if (obj.userData.paintCanvas) {
+          newMap = obj.userData.paintTexture;
+          newColor = '#ffffff';
+        } else {
+          newColor = obj.userData.originalColor || oldColor;
+          obj.userData.originalColor = null;
+        }
+      }
+      return createTextureCommand(obj, oldMap, newMap, oldColor, newColor);
+    };
 
-    if (textureName) {
-      newMap = getTexture(textureName);
-      newColor = '#ffffff'; // Reset color to white so texture shows properly
+    if (all.length === 1) {
+      executeCommand(buildCmd(all[0]));
+    } else {
+      const subCmds = all.map(buildCmd);
+      executeCommand(createCompositeCommand(subCmds, `Texture ${all.length} objects`));
     }
-
-    executeCommand(createTextureCommand(sel, oldMap, newMap, oldColor, newColor));
     modal.classList.add('hidden');
   });
   modal.classList.remove('hidden');
@@ -439,13 +562,11 @@ function doTexture() {
 
 // Hole Mode (CSG)
 document.getElementById('action-hole').addEventListener('click', doHole);
-async function doHole() {
+function doHole() {
   const sel = getSelected();
   if (!sel) return;
 
   try {
-    // Dynamic import of CSG module
-    const { performCSGSubtraction } = await import('./csg.js');
     const { affectedObjects, oldGeometries, newGeometries } = performCSGSubtraction(sel, getSceneObjects());
 
     if (affectedObjects.length === 0) {
@@ -461,6 +582,139 @@ async function doHole() {
     console.error('CSG error:', e);
     alert('CSG subtraction failed. The Three.js CSG addon may not be available.\n\nError: ' + e.message);
   }
+}
+
+// Split
+document.getElementById('action-split').addEventListener('click', doSplit);
+function doSplit() {
+  const sel = getSelected();
+  if (!sel) return;
+
+  try {
+    const { affectedObjects, oldGeometries, outsideGeometries, insideGeometries } = performCSGSplit(sel, getSceneObjects());
+
+    if (affectedObjects.length === 0) {
+      alert('No intersecting objects found for splitting.');
+      return;
+    }
+
+    // Create inside meshes (clones of the original objects with inside geometry)
+    const insideMeshes = affectedObjects.map((obj, i) => {
+      const mesh = new THREE.Mesh(insideGeometries[i], obj.material.clone());
+      mesh.position.copy(obj.position);
+      mesh.rotation.copy(obj.rotation);
+      mesh.scale.copy(obj.scale);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.userData.shapeType = obj.userData.shapeType + ' (inner)';
+      mesh.userData.isShape = true;
+      mesh.userData.isCSGResult = true;
+      return mesh;
+    });
+
+    executeCommand(createSplitCommand(scene, sel, affectedObjects, oldGeometries, outsideGeometries, insideMeshes, () => deselectObject(scene)));
+  } catch (e) {
+    console.error('CSG split error:', e);
+    alert('CSG split failed.\n\nError: ' + e.message);
+  }
+}
+
+// Group
+document.getElementById('action-group').addEventListener('click', doGroup);
+function doGroup() {
+  const all = getSelectedAll();
+  if (all.length < 2) return;
+
+  const group = new THREE.Group();
+  group.userData.isShape = true;
+  group.userData.isGroup = true;
+  group.userData.shapeType = 'Group';
+
+  // Compute center of all objects to use as group pivot
+  const center = new THREE.Vector3();
+  all.forEach(obj => center.add(obj.position));
+  center.divideScalar(all.length);
+  group.position.copy(center);
+
+  // Save original positions for undo
+  const originalPositions = all.map(obj => obj.position.clone());
+
+  executeCommand({
+    description: `Group ${all.length} objects`,
+    execute() {
+      deselectObject(scene);
+      for (let i = 0; i < all.length; i++) {
+        scene.remove(all[i]);
+        all[i].position.copy(originalPositions[i]).sub(center);
+        group.add(all[i]);
+      }
+      scene.add(group);
+    },
+    undo() {
+      deselectObject(scene);
+      scene.remove(group);
+      for (let i = 0; i < all.length; i++) {
+        group.remove(all[i]);
+        all[i].position.copy(originalPositions[i]);
+        scene.add(all[i]);
+      }
+    }
+  });
+}
+
+// Ungroup
+document.getElementById('action-ungroup').addEventListener('click', doUngroup);
+function doUngroup() {
+  const sel = getSelected();
+  if (!sel || !sel.userData.isGroup) return;
+
+  const group = sel;
+  const children = [...group.children.filter(c => !c.userData.isOutline)];
+  const groupPos = group.position.clone();
+  const groupQuat = group.quaternion.clone();
+  const groupScale = group.scale.clone();
+
+  // Compute each child's world transform for ungrouping
+  const worldTransforms = children.map(child => {
+    child.updateMatrixWorld(true);
+    const pos = new THREE.Vector3();
+    const quat = new THREE.Quaternion();
+    const scl = new THREE.Vector3();
+    child.matrixWorld.decompose(pos, quat, scl);
+    return { pos, quat, scl };
+  });
+  // Save local transforms for re-grouping on undo
+  const localTransforms = children.map(child => ({
+    pos: child.position.clone(),
+    quat: child.quaternion.clone(),
+    scl: child.scale.clone(),
+  }));
+
+  executeCommand({
+    description: `Ungroup ${children.length} objects`,
+    execute() {
+      deselectObject(scene);
+      scene.remove(group);
+      for (let i = 0; i < children.length; i++) {
+        group.remove(children[i]);
+        children[i].position.copy(worldTransforms[i].pos);
+        children[i].quaternion.copy(worldTransforms[i].quat);
+        children[i].scale.copy(worldTransforms[i].scl);
+        scene.add(children[i]);
+      }
+    },
+    undo() {
+      deselectObject(scene);
+      for (let i = 0; i < children.length; i++) {
+        scene.remove(children[i]);
+        children[i].position.copy(localTransforms[i].pos);
+        children[i].quaternion.copy(localTransforms[i].quat);
+        children[i].scale.copy(localTransforms[i].scl);
+        group.add(children[i]);
+      }
+      scene.add(group);
+    }
+  });
 }
 
 // Undo/Redo
@@ -505,15 +759,23 @@ function updateGlowButton() {
 onSelect(updateGlowButton);
 
 function doGlow() {
-  const sel = getSelected();
-  if (!sel) return;
-  const enableGlow = !sel.userData.isGlowing;
-  executeCommand(createGlowCommand(sel, scene, enableGlow, addGlowLight, removeGlowLight));
+  const all = getSelectedAll();
+  if (all.length === 0) return;
+  const primary = getSelected();
+  const enableGlow = !primary.userData.isGlowing;
+  if (all.length === 1) {
+    executeCommand(createGlowCommand(all[0], scene, enableGlow, addGlowLight, removeGlowLight));
+  } else {
+    const subCmds = all.map(obj =>
+      createGlowCommand(obj, scene, enableGlow, addGlowLight, removeGlowLight)
+    );
+    executeCommand(createCompositeCommand(subCmds, `${enableGlow ? 'Enable' : 'Disable'} Glow`));
+  }
   updateGlowButton();
 }
 
 // Light panel
-const lightBtn = document.getElementById('light-btn');
+const lightBtn = document.getElementById('light-btn-top');
 const lightPanel = document.getElementById('light-panel');
 lightBtn.addEventListener('click', () => {
   lightPanel.classList.toggle('hidden');
@@ -596,22 +858,29 @@ function loadProject(name) {
 
   // Load objects
   const meshes = deserializeObjects(data);
-  meshes.forEach(mesh => {
-    // Apply pending textures
-    if (mesh.material.userData.pendingTexture) {
-      const tex = getTexture(mesh.material.userData.pendingTexture);
+  function restoreMeshData(obj) {
+    if (obj.material && obj.material.userData.pendingTexture) {
+      const tex = getTexture(obj.material.userData.pendingTexture);
       if (tex) {
-        mesh.material.map = tex;
-        mesh.material.color.set('#ffffff');
-        mesh.material.needsUpdate = true;
+        obj.material.map = tex;
+        obj.material.color.set('#ffffff');
+        obj.material.needsUpdate = true;
       }
-      delete mesh.material.userData.pendingTexture;
+      delete obj.material.userData.pendingTexture;
     }
-    // Restore paint canvas
-    if (mesh.userData.pendingPaintData) {
-      restorePaintCanvas(mesh, mesh.userData.pendingPaintData);
-      delete mesh.userData.pendingPaintData;
+    if (obj.userData.pendingPaintData) {
+      restorePaintCanvas(obj, obj.userData.pendingPaintData);
+      delete obj.userData.pendingPaintData;
     }
+    // Process group children
+    if (obj.userData.isGroup) {
+      obj.children.forEach(child => {
+        if (child.userData.isShape) restoreMeshData(child);
+      });
+    }
+  }
+  meshes.forEach(mesh => {
+    restoreMeshData(mesh);
     scene.add(mesh);
   });
 
@@ -809,6 +1078,9 @@ initShortcuts({
   texture: doTexture,
   color: doColor,
   hole: doHole,
+  split: doSplit,
+  group: doGroup,
+  ungroup: doUngroup,
   glow: doGlow,
   floorColor: () => { floorColorInput.value = '#' + floorMaterial.color.getHexString(); floorColorInput.click(); },
   wallColor: () => { wallColorInput.value = '#' + wallMaterial.color.getHexString(); wallColorInput.click(); },

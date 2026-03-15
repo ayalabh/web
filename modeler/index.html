@@ -20,61 +20,148 @@
 <body>
   <!-- Top Toolbar -->
   <div id="top-toolbar">
-    <div class="toolbar-group" id="tools-group">
-      <button id="tool-select" class="tool-btn active" data-tool="select" title="Select (S)">
-        <img class="tool-icon" src="icons/mouse-pointer.svg" alt="Select">
-        <span class="tool-label">Select</span>
+    <!-- Adjust Category -->
+    <div class="toolbar-category collapsed" data-category="adjust">
+      <button class="category-header" title="Adjust">
+        <img class="category-icon" src="icons/wrench.svg" alt="Adjust">
+        <span class="category-name">Adjust</span>
       </button>
-      <button id="tool-move" class="tool-btn" data-tool="move" title="Move (M)">
-        <img class="tool-icon" src="icons/move.svg" alt="Move">
-        <span class="tool-label">Move</span>
-      </button>
-      <button id="tool-rotate" class="tool-btn" data-tool="rotate" title="Rotate (R)">
-        <img class="tool-icon" src="icons/rotate-cw.svg" alt="Rotate">
-        <span class="tool-label">Rotate</span>
-      </button>
-      <button id="tool-scale" class="tool-btn" data-tool="scale" title="Scale (A)">
-        <img class="tool-icon" src="icons/scaling.svg" alt="Scale">
-        <span class="tool-label">Scale</span>
-      </button>
-      <button id="tool-camera" class="tool-btn" data-tool="camera" title="Camera (Ctrl+M)">
-        <img class="tool-icon" src="icons/camera.svg" alt="Camera">
-        <span class="tool-label">Camera</span>
-      </button>
+      <div class="category-buttons" id="tools-group">
+        <button id="tool-select" class="tool-btn active" data-tool="select" title="Select (S)">
+          <img class="tool-icon" src="icons/mouse-pointer.svg" alt="Select">
+          <span class="tool-label">Select</span>
+        </button>
+        <button id="tool-move" class="tool-btn" data-tool="move" title="Move (M)">
+          <img class="tool-icon" src="icons/move.svg" alt="Move">
+          <span class="tool-label">Move</span>
+        </button>
+        <button id="tool-rotate" class="tool-btn" data-tool="rotate" title="Rotate (R)">
+          <img class="tool-icon" src="icons/rotate-cw.svg" alt="Rotate">
+          <span class="tool-label">Rotate</span>
+        </button>
+        <button id="tool-scale" class="tool-btn" data-tool="scale" title="Scale (A)">
+          <img class="tool-icon" src="icons/scaling.svg" alt="Scale">
+          <span class="tool-label">Scale</span>
+        </button>
+        <button id="action-texture" class="tool-btn" disabled title="Texture (T)">
+          <img class="tool-icon" src="icons/image.svg" alt="Texture">
+          <span class="tool-label">Texture</span>
+        </button>
+        <button id="action-color" class="tool-btn" disabled title="Color (L)">
+          <img class="tool-icon" src="icons/palette.svg" alt="Color">
+          <span class="tool-label">Color</span>
+        </button>
+        <button id="action-glow" class="tool-btn" disabled title="Toggle Glow (G)">
+          <img class="tool-icon" src="icons/sparkles.svg" alt="Glow">
+          <span class="tool-label">Glow</span>
+        </button>
+      </div>
+      <button class="category-more" title="Expand">...</button>
     </div>
 
     <div class="toolbar-divider"></div>
 
-    <div class="toolbar-group" id="actions-group">
-      <button id="action-delete" class="tool-btn" disabled title="Delete (Del)">
-        <img class="tool-icon" src="icons/trash.svg" alt="Delete">
-        <span class="tool-label">Delete</span>
+    <!-- Change Category -->
+    <div class="toolbar-category collapsed" data-category="change">
+      <button class="category-header" title="Change">
+        <img class="category-icon" src="icons/hammer.svg" alt="Change">
+        <span class="category-name">Change</span>
       </button>
-      <button id="action-duplicate" class="tool-btn" disabled title="Duplicate (D)">
-        <img class="tool-icon" src="icons/copy.svg" alt="Duplicate">
-        <span class="tool-label">Duplicate</span>
-      </button>
-      <button id="action-texture" class="tool-btn" disabled title="Texture (T)">
-        <img class="tool-icon" src="icons/image.svg" alt="Texture">
-        <span class="tool-label">Texture</span>
-      </button>
-      <button id="action-color" class="tool-btn" disabled title="Color (L)">
-        <img class="tool-icon" src="icons/palette.svg" alt="Color">
-        <span class="tool-label">Color</span>
-      </button>
-      <button id="action-glow" class="tool-btn" disabled title="Toggle Glow (G)">
-        <img class="tool-icon" src="icons/sparkles.svg" alt="Glow">
-        <span class="tool-label">Glow</span>
-      </button>
-      <button id="action-hole" class="tool-btn" disabled title="Hole Mode (H)">
-        <img class="tool-icon" src="icons/circle-minus.svg" alt="Hole">
-        <span class="tool-label">Hole</span>
-      </button>
+      <div class="category-buttons" id="actions-group">
+        <button id="action-delete" class="tool-btn" disabled title="Delete (Del)">
+          <img class="tool-icon" src="icons/trash.svg" alt="Delete">
+          <span class="tool-label">Delete</span>
+        </button>
+        <button id="action-duplicate" class="tool-btn" disabled title="Duplicate (D)">
+          <img class="tool-icon" src="icons/copy.svg" alt="Duplicate">
+          <span class="tool-label">Duplicate</span>
+        </button>
+        <button id="action-hole" class="tool-btn" disabled title="Hole Mode (H)">
+          <img class="tool-icon" src="icons/circle-minus.svg" alt="Hole">
+          <span class="tool-label">Hole</span>
+        </button>
+        <button id="action-split" class="tool-btn" disabled title="Split (J)">
+          <img class="tool-icon" src="icons/scissors.svg" alt="Split">
+          <span class="tool-label">Split</span>
+        </button>
+        <button id="action-group" class="tool-btn" disabled title="Group (Ctrl+G)">
+          <img class="tool-icon" src="icons/group.svg" alt="Group">
+          <span class="tool-label">Group</span>
+        </button>
+        <button id="action-ungroup" class="tool-btn" disabled title="Ungroup (Ctrl+Shift+G)">
+          <img class="tool-icon" src="icons/ungroup.svg" alt="Ungroup">
+          <span class="tool-label">Ungroup</span>
+        </button>
+      </div>
+      <button class="category-more" title="Expand">...</button>
     </div>
 
     <div class="toolbar-divider"></div>
 
-    <div class="toolbar-group" id="history-group">
+    <!-- Workspace Category -->
+    <div class="toolbar-category collapsed" data-category="workspace">
+      <button class="category-header" title="Workspace">
+        <img class="category-icon" src="icons/ladder.svg" alt="Workspace">
+        <span class="category-name">Workspace</span>
+      </button>
+      <div class="category-buttons" id="workspace-group">
+        <button id="tool-camera" class="tool-btn" data-tool="camera" title="Camera (Ctrl+M)">
+          <img class="tool-icon" src="icons/camera.svg" alt="Camera">
+          <span class="tool-label">Camera</span>
+        </button>
+        <button class="tool-btn" id="light-btn-top" title="Scene Light">
+          <img class="tool-icon" src="icons/lightbulb.svg" alt="Light">
+          <span class="tool-label">Light</span>
+        </button>
+        <button id="action-preview" class="tool-btn" title="Preview (P)">
+          <img class="tool-icon" src="icons/eye.svg" alt="Preview">
+          <span class="tool-label">Preview</span>
+        </button>
+        <button id="action-open" class="tool-btn" title="Open (Ctrl+O)">
+          <img class="tool-icon" src="icons/folder-open.svg" alt="Open">
+          <span class="tool-label">Open</span>
+        </button>
+        <button id="action-save" class="tool-btn" title="Save (Ctrl+S)">
+          <img class="tool-icon" src="icons/save.svg" alt="Save">
+          <span class="tool-label">Save</span>
+        </button>
+        <button id="action-export" class="tool-btn" title="Export (Ctrl+E)">
+          <img class="tool-icon" src="icons/download.svg" alt="Export">
+          <span class="tool-label">Export</span>
+        </button>
+        <button id="action-theme" class="tool-btn" title="Toggle Theme (Ctrl+Q)">
+          <img class="tool-icon" id="theme-icon" src="icons/sun.svg" alt="Theme">
+          <span class="tool-label">Theme</span>
+        </button>
+        <button id="action-history" class="tool-btn" title="History (Shift+H)">
+          <img class="tool-icon" src="icons/history.svg" alt="History">
+          <span class="tool-label">History</span>
+        </button>
+      </div>
+      <button class="category-more" title="Expand">...</button>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <!-- Physics Category -->
+    <div class="toolbar-category collapsed" data-category="physics">
+      <button class="category-header" title="Physics">
+        <img class="category-icon" src="icons/magnet.svg" alt="Physics">
+        <span class="category-name">Physics</span>
+      </button>
+      <div class="category-buttons" id="physics-group">
+        <button id="action-solid-floor" class="tool-btn" title="Floor Clamp">
+          <img class="tool-icon" src="icons/arrow-down-to-line.svg" alt="Clamp">
+          <span class="tool-label">Clamp</span>
+        </button>
+      </div>
+      <button class="category-more" title="Expand">...</button>
+    </div>
+
+    <div class="toolbar-spacer"></div>
+
+    <!-- Always visible: Undo, Redo, Help -->
+    <div class="toolbar-group" id="global-group">
       <button id="action-undo" class="tool-btn" title="Undo (Ctrl+Z)">
         <img class="tool-icon" src="icons/undo.svg" alt="Undo">
         <span class="tool-label">Undo</span>
@@ -83,42 +170,9 @@
         <img class="tool-icon" src="icons/redo.svg" alt="Redo">
         <span class="tool-label">Redo</span>
       </button>
-      <button id="action-history" class="tool-btn" title="History (Shift+H)">
-        <img class="tool-icon" src="icons/history.svg" alt="History">
-        <span class="tool-label">History</span>
-      </button>
       <button id="action-help" class="tool-btn" title="Help (?)">
         <img class="tool-icon" src="icons/help-circle.svg" alt="Help">
         <span class="tool-label">Help</span>
-      </button>
-    </div>
-
-    <div class="toolbar-spacer"></div>
-
-    <div class="toolbar-group" id="file-group">
-      <button id="action-solid-floor" class="tool-btn" title="Solid Floor — prevent objects going below floor">
-        <img class="tool-icon" src="icons/arrow-down-to-line.svg" alt="Solid Floor">
-        <span class="tool-label">Clamp</span>
-      </button>
-      <button id="action-preview" class="tool-btn" title="Preview (P)">
-        <img class="tool-icon" src="icons/eye.svg" alt="Preview">
-        <span class="tool-label">Preview</span>
-      </button>
-      <button id="action-save" class="tool-btn" title="Save (Ctrl+S)">
-        <img class="tool-icon" src="icons/save.svg" alt="Save">
-        <span class="tool-label">Save</span>
-      </button>
-      <button id="action-open" class="tool-btn" title="Open (Ctrl+O)">
-        <img class="tool-icon" src="icons/folder-open.svg" alt="Open">
-        <span class="tool-label">Open</span>
-      </button>
-      <button id="action-export" class="tool-btn" title="Export (Ctrl+E)">
-        <img class="tool-icon" src="icons/download.svg" alt="Export">
-        <span class="tool-label">Export</span>
-      </button>
-      <button id="action-theme" class="tool-btn" title="Toggle Theme (Ctrl+Q)">
-        <img class="tool-icon" id="theme-icon" src="icons/sun.svg" alt="Theme">
-        <span class="tool-label">Theme</span>
       </button>
     </div>
   </div>
@@ -167,12 +221,6 @@
           <span class="shape-label">Wall</span>
         </button>
 
-        <div class="left-toolbar-divider"></div>
-
-        <button class="shape-btn" id="light-btn" title="Scene Light">
-          <img class="shape-icon" src="icons/lightbulb.svg" alt="Light">
-          <span class="shape-label">Light</span>
-        </button>
       </div>
       <button id="left-toolbar-toggle" title="Toggle sidebar">◀</button>
     </div>
@@ -183,10 +231,24 @@
     </div>
   </div>
 
-  <!-- Hidden color inputs -->
-  <input type="color" id="color-picker-input" value="#cccccc" style="display:none;">
+  <!-- Hidden color inputs for floor/wall -->
   <input type="color" id="floor-color-input" value="#2a2a2a" style="display:none;">
   <input type="color" id="wall-color-input" value="#0a0a1a" style="display:none;">
+
+  <!-- Color Panel -->
+  <div id="color-panel" class="panel hidden" style="right: auto; width: 220px;">
+    <div class="panel-header">
+      <h3>Color</h3>
+      <button class="panel-close">&times;</button>
+    </div>
+    <div style="padding: 12px;">
+      <input type="color" id="color-picker-input" value="#cccccc" style="width:100%; height:40px; border:none; cursor:pointer; border-radius:4px;">
+      <label style="display:block; font-size:12px; margin-top:10px;">
+        Opacity <span id="opacity-label">100%</span>
+        <input type="range" id="opacity-slider" min="0" max="100" value="100" style="width:100%;">
+      </label>
+    </div>
+  </div>
 
   <!-- Light Settings Panel -->
   <div id="light-panel" class="panel hidden" style="left: 10px; right: auto;">
